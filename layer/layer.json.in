@@ -1,0 +1,17 @@
+{
+        "file_format_version" : "1.0.0",
+        "layer" : {
+                "name": "VK_LAYER_LFX_LatencyFleX",
+                "type": "GLOBAL",
+                "library_path": "@lib_path@",
+                "api_version": "1.2.136",
+                "implementation_version": "1",
+                "description": "LatencyFleX (TM) latency reduction middleware",
+                "enable_environment": { "LFX": "1" },
+                "disable_environment": { "DISABLE_LFX": "0" },
+                "functions": {
+                        "vkGetInstanceProcAddr": "lfx_GetInstanceProcAddr",
+                        "vkGetDeviceProcAddr": "lfx_GetDeviceProcAddr"
+                }
+        }
+}

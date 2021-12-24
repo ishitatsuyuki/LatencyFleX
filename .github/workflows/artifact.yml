@@ -1,0 +1,73 @@
+name: Artifacts (Package)
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Prepare Artifact Git Info
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+          ARTIFACT_NAME="commit-$(git rev-parse --short "$GITHUB_SHA")"
+          if [ ${{ github.event_name == 'pull_request' }} ]; then
+            echo "##[set-output name=short-sha;]$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")"
+            if [ ! -z "${{ github.event.pull_request.number }}" ]; then
+              ARTIFACT_NAME="pr-${{ github.event.pull_request.number }}-commit-$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")"
+            fi
+          else
+            echo "##[set-output name=short-sha;]$(git rev-parse --short "$GITHUB_SHA")"
+          fi
+          echo "##[set-output name=artifact-metadata;]${ARTIFACT_NAME}"
+        id: git-vars
+
+      - uses: actions/setup-python@v2
+
+      - run: |
+          sudo dpkg --add-architecture i386
+          wget -qO - https://dl.winehq.org/wine-builds/winehq.key | sudo apt-key add -
+          sudo apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu focal main"
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list https://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+          sudo apt update
+          # The Github's Ubuntu images since 20211122.1 are broken
+          # https://github.com/actions/virtual-environments/issues/4589
+          sudo apt install -y --allow-downgrades libpcre2-8-0=10.34-7
+          sudo apt install --no-install-recommends -y ninja-build cmake vulkan-sdk winehq-staging wine-staging wine-staging-i386
+          pip install meson
+
+      - run: |
+          VERSION=$(git rev-parse --short HEAD)
+          OUTDIR="${PWD}/dist/latencyflex-${VERSION}"
+          echo "OUTDIR=${OUTDIR}" >> $GITHUB_ENV
+          mkdir -p $OUTDIR
+
+      - run: |
+          cd layer
+          meson build -Dprefix=/usr
+          ninja -C build
+          mkdir -p "${OUTDIR}/layer"
+          DESTDIR="${OUTDIR}/layer" meson install -C build --skip-subprojects
+
+      - run: |
+          export LIBRARY_PATH="${OUTDIR}/layer/usr/lib/x86_64-linux-gnu"
+          cd layer/wine
+          meson build -Dprefix=/usr --cross cross-wine64.txt 
+          ninja -C build
+          mkdir -p "${OUTDIR}/wine"
+          DESTDIR="${OUTDIR}/wine" meson install -C build --skip-subprojects          
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        continue-on-error: true
+        with:
+          name: LatencyFleX-${{steps.git-vars.outputs.artifact-metadata}}
+          path: ${{env.OUTDIR}}
+          retention-days: 30

@@ -1,0 +1,16 @@
+[binaries]
+c = 'winegcc'
+cpp = 'wineg++'
+ar = 'ar'
+strip = 'strip'
+
+[properties]
+c_link_args = ['-mwindows']
+needs_exe_wrapper = true
+winelib = true
+
+[host_machine]
+system = 'linux'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

@@ -1,0 +1,4 @@
+option('old_install_layout',
+       type : 'boolean',
+       value : false,
+       description : 'Use old (<= 6.8) Wine directory layout for installs. Default: false')

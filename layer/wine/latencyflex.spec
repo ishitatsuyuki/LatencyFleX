@@ -1,0 +1,1 @@
+@ cdecl winelfx_WaitAndBeginFrame()

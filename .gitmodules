@@ -1,0 +1,6 @@
+[submodule "layer/funchook"]
+	path = layer/subprojects/funchook
+	url = https://github.com/kubo/funchook.git
+[submodule "layer/subprojects/perfetto"]
+	path = layer/subprojects/perfetto
+	url = https://android.googlesource.com/platform/external/perfetto
