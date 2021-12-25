@@ -16,11 +16,11 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <cstring>
 #include <deque>
 #include <iostream>
 #include <map>
 #include <mutex>
-#include <cstring>
 
 #include <dlfcn.h>
 #include <vulkan/vk_layer.h>
@@ -130,9 +130,9 @@ static FenceWaitThread *wait_thread;
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Layer init and shutdown
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateInstance(
-    const VkInstanceCreateInfo *pCreateInfo,
-    const VkAllocationCallbacks *pAllocator, VkInstance *pInstance) {
+VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
+                                       const VkAllocationCallbacks *pAllocator,
+                                       VkInstance *pInstance) {
   VkLayerInstanceCreateInfo *layerCreateInfo =
       (VkLayerInstanceCreateInfo *)pCreateInfo->pNext;
 
@@ -186,16 +186,17 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateInstance(
   return VK_SUCCESS;
 }
 
-VK_LAYER_EXPORT void VKAPI_CALL lfx_DestroyInstance(
-    VkInstance instance, const VkAllocationCallbacks *pAllocator) {
+void VKAPI_CALL lfx_DestroyInstance(VkInstance instance,
+                                    const VkAllocationCallbacks *pAllocator) {
   delete wait_thread;
   scoped_lock l(global_lock);
   instance_dispatch.erase(GetKey(instance));
 }
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateDevice(
-    VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
-    const VkAllocationCallbacks *pAllocator, VkDevice *pDevice) {
+VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
+                                     const VkDeviceCreateInfo *pCreateInfo,
+                                     const VkAllocationCallbacks *pAllocator,
+                                     VkDevice *pDevice) {
   VkLayerDeviceCreateInfo *layerCreateInfo =
       (VkLayerDeviceCreateInfo *)pCreateInfo->pNext;
 
@@ -248,8 +249,8 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateDevice(
   return VK_SUCCESS;
 }
 
-VK_LAYER_EXPORT void VKAPI_CALL
-lfx_DestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator) {
+void VKAPI_CALL lfx_DestroyDevice(VkDevice device,
+                                  const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
   device_dispatch.erase(GetKey(device));
   device_map.erase(GetKey(device));
@@ -258,7 +259,7 @@ lfx_DestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator) {
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration function
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(
+VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(
     uint32_t *pPropertyCount, VkLayerProperties *pProperties) {
   if (pPropertyCount)
     *pPropertyCount = 1;
@@ -274,13 +275,13 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(
   return VK_SUCCESS;
 }
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateDeviceLayerProperties(
+VkResult VKAPI_CALL lfx_EnumerateDeviceLayerProperties(
     VkPhysicalDevice physicalDevice, uint32_t *pPropertyCount,
     VkLayerProperties *pProperties) {
   return lfx_EnumerateInstanceLayerProperties(pPropertyCount, pProperties);
 }
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(
+VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(
     const char *pLayerName, uint32_t *pPropertyCount,
     VkExtensionProperties *pProperties) {
   if (pLayerName == nullptr || strcmp(pLayerName, LAYER_NAME))
@@ -292,7 +293,7 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(
   return VK_SUCCESS;
 }
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
+VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
     VkPhysicalDevice physicalDevice, const char *pLayerName,
     uint32_t *pPropertyCount, VkExtensionProperties *pProperties) {
   // pass through any queries that aren't to us
@@ -312,8 +313,8 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
   return VK_SUCCESS;
 }
 
-VK_LAYER_EXPORT VkResult VKAPI_CALL
-lfx_QueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
+VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
+                                        const VkPresentInfoKHR *pPresentInfo) {
   frame_counter_render++;
   int frame_counter_local = frame_counter.load();
   int frame_counter_render_local = frame_counter_render.load();
@@ -429,8 +430,7 @@ VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
     // so the user can at least quit the application
     target = std::min(now + UINT64_C(50000000), target);
     std::this_thread::sleep_for(std::chrono::nanoseconds(target - now));
-  } else
-  {
+  } else {
     target = now;
   }
   {
@@ -447,4 +447,4 @@ public:
 };
 
 [[maybe_unused]] OnLoad on_load;
-}
+} // namespace
