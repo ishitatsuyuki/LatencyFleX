@@ -443,7 +443,7 @@ VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
 namespace {
 class OnLoad {
 public:
-  OnLoad() { std::cerr << "LatencyFlex: module loaded" << std::endl; }
+  OnLoad() { std::cerr << "LatencyFleX: module loaded" << std::endl; }
 };
 
 [[maybe_unused]] OnLoad on_load;
