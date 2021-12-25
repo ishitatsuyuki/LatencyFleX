@@ -133,7 +133,6 @@ static FenceWaitThread *wait_thread;
 VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateInstance(
     const VkInstanceCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkInstance *pInstance) {
-  wait_thread = new FenceWaitThread;
   VkLayerInstanceCreateInfo *layerCreateInfo =
       (VkLayerInstanceCreateInfo *)pCreateInfo->pNext;
 
@@ -159,6 +158,8 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateInstance(
       (PFN_vkCreateInstance)gpa(VK_NULL_HANDLE, "vkCreateInstance");
 
   VkResult ret = createFunc(pCreateInfo, pAllocator, pInstance);
+  if (ret != VK_SUCCESS)
+    return ret;
 
   // fetch our own dispatch table for the functions we need, into the next layer
   VkLayerInstanceDispatchTable dispatchTable;
@@ -175,6 +176,7 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateInstance(
     scoped_lock l(global_lock);
     instance_dispatch[GetKey(*pInstance)] = dispatchTable;
   }
+  wait_thread = new FenceWaitThread;
 
   if (void *mod = dlopen("libMangoHud.so", RTLD_NOW | RTLD_NOLOAD)) {
     overlay_SetMetrics =
@@ -220,6 +222,8 @@ VK_LAYER_EXPORT VkResult VKAPI_CALL lfx_CreateDevice(
       (PFN_vkCreateDevice)gipa(VK_NULL_HANDLE, "vkCreateDevice");
 
   VkResult ret = createFunc(physicalDevice, pCreateInfo, pAllocator, pDevice);
+  if (ret != VK_SUCCESS)
+    return ret;
 
 #define ASSIGN_FUNCTION(name)                                                  \
   dispatchTable.name = (PFN_vk##name)gdpa(*pDevice, "vk" #name);

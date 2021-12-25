@@ -32,8 +32,6 @@ Bufferbloat has been studied.
 
 ## Known issues
 
-- LatencyFleX layer might cause hangs or crashes when used with VKD3D-Proton. The cause is being investigated. If the
-  game can run in DX11, use DX11 mode instead.
 - Minor stutters might happen during gaming session. The algorithm is still being tuned, but open an issue if the stutter
   is severe.
 - GPU utilization will be lower when running with LatencyFleX. Overall LatencyFleX should be able to achieve ~95%
@@ -128,12 +126,10 @@ For now, LatencyFleX can be used through one of the following injection method. 
 
 Tested games:
 
-| Game        | Support | Method           |
-|-------------|---------|------------------|
-| Splitgate   | ✅       | Linux UE4 Hook   |
-| Ghostrunner | ✅       | Proton NVAPI[^1] |
-
-[^1]: DX11 only. Hangs/crashes with DX12
+| Game        | Support | Method         |
+|-------------|---------|----------------|
+| Splitgate   | ✅       | Linux UE4 Hook |
+| Ghostrunner | ✅       | Proton NVAPI   |
 
 Game supported but not in list? File a PR to update the table.
 
