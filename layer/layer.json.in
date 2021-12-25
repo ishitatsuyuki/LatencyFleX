@@ -8,7 +8,7 @@
                 "implementation_version": "1",
                 "description": "LatencyFleX (TM) latency reduction middleware",
                 "enable_environment": { "LFX": "1" },
-                "disable_environment": { "DISABLE_LFX": "0" },
+                "disable_environment": { "DISABLE_LFX": "1" },
                 "functions": {
                         "vkGetInstanceProcAddr": "lfx_GetInstanceProcAddr",
                         "vkGetDeviceProcAddr": "lfx_GetDeviceProcAddr"
