@@ -175,12 +175,12 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   {
     scoped_lock l(global_lock);
     instance_dispatch[GetKey(*pInstance)] = dispatchTable;
-  }
-  wait_thread = new FenceWaitThread;
+    wait_thread = new FenceWaitThread;
 
-  if (void *mod = dlopen("libMangoHud.so", RTLD_NOW | RTLD_NOLOAD)) {
-    overlay_SetMetrics =
-        (PFN_overlay_SetMetrics)dlsym(mod, "overlay_SetMetrics");
+    if (void *mod = dlopen("libMangoHud.so", RTLD_NOW | RTLD_NOLOAD)) {
+      overlay_SetMetrics =
+          (PFN_overlay_SetMetrics)dlsym(mod, "overlay_SetMetrics");
+    }
   }
 
   return VK_SUCCESS;
