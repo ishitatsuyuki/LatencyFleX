@@ -351,7 +351,7 @@ VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
   if (!strcmp(pName, "vk" #func))                                              \
   return (PFN_vkVoidFunction)&lfx_##func
 
-VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL
+extern "C" VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL
 lfx_GetDeviceProcAddr(VkDevice device, const char *pName) {
   // device chain functions we intercept
   GETPROCADDR(GetDeviceProcAddr);
@@ -367,7 +367,7 @@ lfx_GetDeviceProcAddr(VkDevice device, const char *pName) {
   }
 }
 
-VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL
+extern "C" VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL
 lfx_GetInstanceProcAddr(VkInstance instance, const char *pName) {
   // instance chain functions we intercept
   GETPROCADDR(GetInstanceProcAddr);
@@ -391,7 +391,7 @@ lfx_GetInstanceProcAddr(VkInstance instance, const char *pName) {
   }
 }
 
-VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
+extern "C" VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
   frame_counter++;
   int frame_counter_local = frame_counter.load();
   int frame_counter_render_local = frame_counter_render.load();

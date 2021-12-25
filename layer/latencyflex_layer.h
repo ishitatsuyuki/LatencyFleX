@@ -19,9 +19,11 @@
 #include <chrono>
 #include <cstdint>
 
+#include <vulkan/vk_layer.h>
+
 // These are private APIs. There is no backwards compatibility guarantee.
 
-void lfx_WaitAndBeginFrame();
+extern "C" VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame();
 
 inline uint64_t current_time_ns() {
   struct timespec tv;
