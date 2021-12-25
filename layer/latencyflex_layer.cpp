@@ -71,6 +71,7 @@ public:
   ~FenceWaitThread();
 
   void Push(PresentInfo &&info) {
+    scoped_lock l(local_lock_);
     queue_.push_back(info);
     notify_.notify_all();
   }
@@ -79,6 +80,7 @@ private:
   void Worker();
 
   std::thread thread_;
+  std::mutex local_lock_;
   std::condition_variable notify_;
   std::deque<PresentInfo> queue_;
   bool running_ = true;
@@ -96,7 +98,7 @@ void FenceWaitThread::Worker() {
   while (true) {
     PresentInfo info;
     {
-      std::unique_lock<std::mutex> l(global_lock);
+      std::unique_lock<std::mutex> l(local_lock_);
       while (queue_.empty()) {
         if (!running_)
           return;
@@ -124,7 +126,7 @@ void FenceWaitThread::Worker() {
   }
 }
 
-static FenceWaitThread *wait_thread;
+std::map<void *, std::unique_ptr<FenceWaitThread>> wait_threads;
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +177,6 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   {
     scoped_lock l(global_lock);
     instance_dispatch[GetKey(*pInstance)] = dispatchTable;
-    wait_thread = new FenceWaitThread;
 
     if (void *mod = dlopen("libMangoHud.so", RTLD_NOW | RTLD_NOLOAD)) {
       overlay_SetMetrics =
@@ -188,7 +189,6 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
 
 void VKAPI_CALL lfx_DestroyInstance(VkInstance instance,
                                     const VkAllocationCallbacks *pAllocator) {
-  delete wait_thread;
   scoped_lock l(global_lock);
   instance_dispatch.erase(GetKey(instance));
 }
@@ -244,6 +244,7 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
     scoped_lock l(global_lock);
     device_dispatch[GetKey(*pDevice)] = dispatchTable;
     device_map[GetKey(*pDevice)] = *pDevice;
+    wait_threads[GetKey(*pDevice)] = std::make_unique<FenceWaitThread>();
   }
 
   return VK_SUCCESS;
@@ -252,6 +253,7 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
 void VKAPI_CALL lfx_DestroyDevice(VkDevice device,
                                   const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
+  wait_threads.erase(GetKey(device));
   device_dispatch.erase(GetKey(device));
   device_map.erase(GetKey(device));
 }
@@ -339,7 +341,7 @@ VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
   submitInfo.signalSemaphoreCount = pPresentInfo->waitSemaphoreCount;
   submitInfo.pSignalSemaphores = pPresentInfo->pWaitSemaphores;
   dispatch.QueueSubmit(queue, 1, &submitInfo, fence);
-  wait_thread->Push({device, fence, frame_counter_render});
+  wait_threads[GetKey(device)]->Push({device, fence, frame_counter_render});
   l.unlock();
   return dispatch.QueuePresentKHR(queue, pPresentInfo);
 }
