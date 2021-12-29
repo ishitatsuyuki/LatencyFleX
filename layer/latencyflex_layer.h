@@ -23,7 +23,8 @@
 
 // These are private APIs. There is no backwards compatibility guarantee.
 
-extern "C" VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame();
+extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame();
+extern "C" VK_LAYER_EXPORT void lfx_SetTargetFrameTime(uint64_t target_frame_time);
 
 inline uint64_t current_time_ns() {
   struct timespec tv;

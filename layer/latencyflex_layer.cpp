@@ -318,8 +318,8 @@ VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
 VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
                                         const VkPresentInfoKHR *pPresentInfo) {
   frame_counter_render++;
-  int frame_counter_local = frame_counter.load();
-  int frame_counter_render_local = frame_counter_render.load();
+  uint64_t frame_counter_local = frame_counter.load();
+  uint64_t frame_counter_render_local = frame_counter_render.load();
   if (frame_counter_local > frame_counter_render_local + kMaxFrameDrift) {
     ticker_needs_reset.store(true);
   }
@@ -341,7 +341,7 @@ VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
   submitInfo.signalSemaphoreCount = pPresentInfo->waitSemaphoreCount;
   submitInfo.pSignalSemaphores = pPresentInfo->pWaitSemaphores;
   dispatch.QueueSubmit(queue, 1, &submitInfo, fence);
-  wait_threads[GetKey(device)]->Push({device, fence, frame_counter_render});
+  wait_threads[GetKey(device)]->Push({device, fence, frame_counter_render_local});
   l.unlock();
   return dispatch.QueuePresentKHR(queue, pPresentInfo);
 }
@@ -393,10 +393,10 @@ lfx_GetInstanceProcAddr(VkInstance instance, const char *pName) {
   }
 }
 
-extern "C" VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
+extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
   frame_counter++;
-  int frame_counter_local = frame_counter.load();
-  int frame_counter_render_local = frame_counter_render.load();
+  uint64_t frame_counter_local = frame_counter.load();
+  uint64_t frame_counter_render_local = frame_counter_render.load();
 
   if (frame_counter_local < frame_counter_render_local) {
     // Presentation has happened without going through the Tick() hook!
@@ -442,10 +442,23 @@ extern "C" VK_LAYER_EXPORT VKAPI_CALL void lfx_WaitAndBeginFrame() {
   }
 }
 
+extern "C" VK_LAYER_EXPORT void lfx_SetTargetFrameTime(uint64_t target_frame_time) {
+  scoped_lock l(global_lock);
+  manager.target_frame_time = target_frame_time;
+  std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time << std::endl;
+}
+
 namespace {
 class OnLoad {
 public:
-  OnLoad() { std::cerr << "LatencyFleX: module loaded" << std::endl; }
+  OnLoad() {
+    std::cerr << "LatencyFleX: module loaded" << std::endl;
+    if (getenv("LFX_MAX_FPS")) {
+      // No lock needed because this is done inside static initialization.
+      manager.target_frame_time = 1000000000 / std::stoul(getenv("LFX_MAX_FPS"));
+      std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time << std::endl;
+    }
+  }
 };
 
 [[maybe_unused]] OnLoad on_load;

@@ -17,3 +17,7 @@
 extern "C" void __cdecl winelfx_WaitAndBeginFrame() {
   return lfx_WaitAndBeginFrame();
 }
+
+extern "C" void __cdecl winelfx_SetTargetFrameTime(__int64 target_frame_time) {
+  return lfx_SetTargetFrameTime(target_frame_time);
+}
