@@ -2,6 +2,8 @@
 
 Vendor and game agnostic latency reduction middleware. An alternative to NVIDIA Reflex.
 
+![LatencyFleX brings competitive advantage with up to 10ms latency reduction](performance.png)
+
 ## Why LatencyFleX?
 
 There is a phenomenon commonly known among gamers, where input lag would increase when the game
