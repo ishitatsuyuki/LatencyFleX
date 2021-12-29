@@ -41,6 +41,8 @@ Bufferbloat has been studied.
 
 ## Building from source
 
+**Note:** Fetch submodules recursively (with `git submodule update --init --recursive`) before build.
+
 The layer (`layer/`) depends on CMake, Meson and the Vulkan SDK.
 
 Build and install with:
@@ -60,7 +62,7 @@ Build with:
 ```shell
 cd layer/wine
 export LIBRARY_PATH="$PWD/../build/" # Required if the layer has not been installed globally
-meson build
+meson build --cross cross-wine64.txt 
 ninja -C build
 ```
 
