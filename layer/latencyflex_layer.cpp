@@ -179,6 +179,7 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
 
 void VKAPI_CALL lfx_DestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
+  instance_dispatch[GetKey(instance)].DestroyInstance(instance, pAllocator);
   instance_dispatch.erase(GetKey(instance));
 }
 
@@ -236,6 +237,7 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
 void VKAPI_CALL lfx_DestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
   wait_threads.erase(GetKey(device));
+  device_dispatch[GetKey(device)].DestroyDevice(device, pAllocator);
   device_dispatch.erase(GetKey(device));
   device_map.erase(GetKey(device));
 }
