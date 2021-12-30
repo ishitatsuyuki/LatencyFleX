@@ -379,7 +379,7 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
   uint64_t frame_counter_local = frame_counter.load();
   uint64_t frame_counter_render_local = frame_counter_render.load();
 
-  if (frame_counter_local < frame_counter_render_local) {
+  if (frame_counter_local <= frame_counter_render_local) {
     // Presentation has happened without going through the Tick() hook!
     // This typically happens during initialization (where graphics are redrawn
     // without ticking the platform loop).
