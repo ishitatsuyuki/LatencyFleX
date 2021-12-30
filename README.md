@@ -68,6 +68,16 @@ ninja -C build
 
 See [install instructions](#installation) for the locations to copy the files to.
 
+---
+
+The Unity mod can be built with .NET Core SDK.
+
+```shell
+cd layer/unity
+dotnet restore
+dotnet build --configuration Release
+```
+
 ## Installation
 
 ### LatencyFleX Vulkan layer (essential)
@@ -144,44 +154,53 @@ Game supported but not in list? File a PR to update the table.
 
 #### Proton NVAPI (for games that already have NVIDIA Reflex integration)
 
-[Install](#installation) the Vulkan layer, wine extension and the modified branch of DXVK-NVAPI.
+1. [Install](#installation) the Vulkan layer, wine extension and the modified branch of DXVK-NVAPI.
+2. Put the following in `dxvk.conf` (only for DX11 games):
+   ```ini
+   dxgi.nvapiHack = False
+   dxgi.customVendorId = 10de # If running on non-NVIDIA GPU
+   ```
 
-Put the following in `dxvk.conf` (only for DX11 games):
-
-```ini
-dxgi.nvapiHack = False
-dxgi.customVendorId = 10de # If running on non-NVIDIA GPU
-```
-
-Launch with the following environment variables:
-
-```shell
-PROTON_ENABLE_NVAPI=1 DXVK_NVAPI_DRIVER_VERSION=49729 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 LFX=1 %command%
-```
+3. Launch with the following environment variables:
+   ```shell
+   PROTON_ENABLE_NVAPI=1 DXVK_NVAPI_DRIVER_VERSION=49729 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 LFX=1 %command%
+   ```
 
 #### UE4 Hook
 
+Supported platforms: Linux (see note)
+
 **Note:** for now, the UE4 hook only supports Linux UE4 builds with PIE disabled.
 
-[Install](#installation) the Vulkan layer.
+1. [Install](#installation) the Vulkan layer.
 
-The first step is to obtain an offset to `FEngineLoop::Tick`. If the game ships with debug symbols, the
-offset can be obtained with the command:
+2. Obtain an offset to `FEngineLoop::Tick`. If the game ships with debug symbols, the 
+   offset can be obtained with the command:
+   ```shell
+   readelf -Ws PortalWars/Binaries/Linux/PortalWars-Linux-Shipping.debug | c++filt | grep FEngineLoop::Tick
+   ```
+   Find the line corresponding to the actual function (other entries are for types used in the function and unrelated):
+   ```
+   268: 00000000026698e0  9876 FUNC    LOCAL  HIDDEN    15 FEngineLoop::Tick()
+   ```
+   Here `26698e0` is the offset we need. We will call it `<OFFSET>` below.
+3. Modify the launch command-line as follows.
+   ```shell
+   LFX=1 LFX_UE4_HOOK=0x<OFFSET> %command%
+   ```
 
-```shell
-readelf -Ws PortalWars/Binaries/Linux/PortalWars-Linux-Shipping.debug | c++filt | grep FEngineLoop::Tick
-```
+#### Unity Mod/Hook
 
-Find the line corresponding to the actual function (other entries are for types used in the function and unrelated):
+Supported platforms: Proton, Linux
 
-```
-268: 00000000026698e0  9876 FUNC    LOCAL  HIDDEN    15 FEngineLoop::Tick()
-```
+**Note:** This is work-in-progress and supports only 2018.x/2019.x on Mono (IL2CPP unsupported).
 
-Here `26698e0` is the offset we need. We will call it `<OFFSET>` below.
-
-Then, modify the launch command-line as follows.
-
-```shell
-LFX=1 LFX_UE4_HOOK=0x<OFFSET> %command%
-```
+1. [Install](#installation) the Vulkan layer. Also install the Wine extension the game runs on Wine/Proton.
+2. Install [BepInEx](https://docs.bepinex.dev/articles/user_guide/installation/index.html) to the game directory.
+3. Drop `unity/LatencyFleX.dll` into `BepInEx/plugins` (you can create the folder manually or BepInEx will create it for
+   you at first startup).
+4. Use the following launch command-line.
+   ```shell
+   LFX=1 %command% -force-vulkan # for native
+   WINEDLLOVERRIDES="winhttp=n,b" LFX=1 %command% # for Proton
+   ```

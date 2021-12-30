@@ -29,6 +29,9 @@ jobs:
         id: git-vars
 
       - uses: actions/setup-python@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.x.x
 
       - run: |
           sudo dpkg --add-architecture i386
@@ -62,7 +65,13 @@ jobs:
           meson build -Dprefix=/usr --cross cross-wine64.txt 
           ninja -C build
           mkdir -p "${OUTDIR}/wine"
-          DESTDIR="${OUTDIR}/wine" meson install -C build --skip-subprojects          
+          DESTDIR="${OUTDIR}/wine" meson install -C build --skip-subprojects
+
+      - run: |
+          cd layer/unity
+          export OUTDIR="${OUTDIR}/unity"
+          dotnet restore
+          dotnet build --configuration Release --no-restore
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
