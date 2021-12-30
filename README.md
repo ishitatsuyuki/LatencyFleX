@@ -126,7 +126,12 @@ For now, LatencyFleX can be used through one of the following injection method. 
 
 ### Running games with LatencyFleX
 
-**Warning:** Avoid using LatencyFleX with anti-cheat enabled games! It can almost certainly get you banned.
+**Warning:** Be careful when using LatencyFleX with games having anti-cheat:
+
+- Direct hooking (UE4 hook) can trip the game's integrity check and directly get you banned.
+- Proton NVAPI integration is relatively safe, but I am not responsible for any bans issued due to LatencyFleX.
+
+Please do it at your own risk.
 
 Tested games:
 
