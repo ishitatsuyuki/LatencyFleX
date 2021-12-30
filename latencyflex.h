@@ -18,8 +18,7 @@
 #ifdef LATENCYFLEX_HAVE_PERFETTO
 #include <perfetto.h>
 PERFETTO_DEFINE_CATEGORIES(
-    perfetto::Category("latencyflex")
-        .SetDescription("LatencyFleX latency and throughput metrics"));
+    perfetto::Category("latencyflex").SetDescription("LatencyFleX latency and throughput metrics"));
 #else
 #define TRACE_COUNTER(...)
 #define TRACE_EVENT_BEGIN(...)
@@ -78,10 +77,8 @@ enum Phases { kUp = 0, kDown, kNumPhases };
 // Access must be externally synchronized.
 class LatencyFleX {
 public:
-  LatencyFleX()
-      : latency_(0.3), inv_throughtput_(0.3), proj_correction_(0.5, true) {
-    std::fill(std::begin(frame_begin_ids_), std::end(frame_begin_ids_),
-              UINT64_MAX);
+  LatencyFleX() : latency_(0.3), inv_throughtput_(0.3), proj_correction_(0.5, true) {
+    std::fill(std::begin(frame_begin_ids_), std::end(frame_begin_ids_), UINT64_MAX);
   }
 
   // Get the desired wake-up time. Sleep until this time, then call
@@ -108,20 +105,21 @@ public:
         int64_t prediction_error =
             (int64_t)prev_frame_end_ts_ -
             (int64_t)(frame_end_projection_base_ +
-                      frame_end_projected_ts_[prev_frame_end_id_ %
-                                              kMaxInflightFrames]);
+                      frame_end_projected_ts_[prev_frame_end_id_ % kMaxInflightFrames]);
         TRACE_COUNTER("latencyflex", "Prediction error", prediction_error);
         int64_t prev_comp_applied = comp_applied_[prev_frame_end_id_ % kMaxInflightFrames];
         // We need to limit the compensation to delay increase, or otherwise we would cancel out the
         // regular delay decrease from our pacing. To achieve this, we treat any early prediction as
         // having prediction error of zero.
-        // We also want to cancel out the counter-reaction from our previous compensation, so what we
-        // essentially want here is `prediction_error_ - prev_prediction_error_ + prev_comp_applied`.
-        // However, due to the nonlinearity we can't just add prev_comp_applied: that would overcompensate
-        // for values going into the negative region. We just attribute the value symmetrically to both
-        // sides of the subtraction, in hope that it will be an unbiased estimate.
-        proj_correction_.update(std::max(INT64_C(0), prediction_error + prev_comp_applied / 2) -
-                                std::max(INT64_C(0), prev_prediction_error_ - prev_comp_applied / 2));
+        // We also want to cancel out the counter-reaction from our previous compensation, so what
+        // we essentially want here is `prediction_error_ - prev_prediction_error_ +
+        // prev_comp_applied`. However, due to the nonlinearity we can't just add prev_comp_applied:
+        // that would overcompensate for values going into the negative region. We just attribute
+        // the value symmetrically to both sides of the subtraction, in hope that it will be an
+        // unbiased estimate.
+        proj_correction_.update(
+            std::max(INT64_C(0), prediction_error + prev_comp_applied / 2) -
+            std::max(INT64_C(0), prev_prediction_error_ - prev_comp_applied / 2));
         prev_prediction_error_ = prediction_error;
         comp_to_apply = std::round(proj_correction_.get());
         comp_applied_[frame_id % kMaxInflightFrames] = comp_to_apply;
@@ -131,35 +129,29 @@ public:
       // The target wakeup time.
       uint64_t target =
           (int64_t)frame_end_projection_base_ +
-          (int64_t)frame_end_projected_ts_[prev_frame_begin_id_ %
-                                           kMaxInflightFrames] +
+          (int64_t)frame_end_projected_ts_[prev_frame_begin_id_ % kMaxInflightFrames] +
           comp_to_apply +
-          (int64_t)std::round(
-              (((int64_t)frame_id - (int64_t)prev_frame_begin_id_) +
-               1 / (phase == kUp ? up_factor_ : 1) - 1) *
-                  invtpt / down_factor_ -
-              latency_.get());
+          (int64_t)std::round((((int64_t)frame_id - (int64_t)prev_frame_begin_id_) +
+                               1 / (phase == kUp ? up_factor_ : 1) - 1) *
+                                  invtpt / down_factor_ -
+                              latency_.get());
       // The projection is something close to the predicted frame end time, but it is always paced
       // at down_factor * throughput, which prevents delay compensation from kicking in until it's
       // actually necessary (i.e. we're overpacing).
       uint64_t new_projection =
-          (int64_t)frame_end_projected_ts_[prev_frame_begin_id_ %
-                                           kMaxInflightFrames] +
+          (int64_t)frame_end_projected_ts_[prev_frame_begin_id_ % kMaxInflightFrames] +
           comp_to_apply +
-          (int64_t)std::round(
-              ((int64_t)frame_id - (int64_t)prev_frame_begin_id_) * invtpt /
-              down_factor_);
+          (int64_t)std::round(((int64_t)frame_id - (int64_t)prev_frame_begin_id_) * invtpt /
+                              down_factor_);
       frame_end_projected_ts_[frame_id % kMaxInflightFrames] = new_projection;
-      TRACE_EVENT_BEGIN("latencyflex", "projection",
-                        perfetto::Track(track_base_ +
-                                        frame_id % kMaxInflightFrames +
-                                        kMaxInflightFrames),
-                        target);
-      TRACE_EVENT_END("latencyflex",
-                      perfetto::Track(track_base_ +
-                                      frame_id % kMaxInflightFrames +
-                                      kMaxInflightFrames),
-                      frame_end_projection_base_ + new_projection);
+      TRACE_EVENT_BEGIN(
+          "latencyflex", "projection",
+          perfetto::Track(track_base_ + frame_id % kMaxInflightFrames + kMaxInflightFrames),
+          target);
+      TRACE_EVENT_END(
+          "latencyflex",
+          perfetto::Track(track_base_ + frame_id % kMaxInflightFrames + kMaxInflightFrames),
+          frame_end_projection_base_ + new_projection);
       prev_frame_target_ts_ = target;
       return target;
     } else {
@@ -176,10 +168,8 @@ public:
   //   wait target as-is. This allows compensating for any latency incurred by
   //   the OS for waking up the process.
   void BeginFrame(uint64_t frame_id, uint64_t timestamp) {
-    TRACE_EVENT_BEGIN(
-        "latencyflex", "frame",
-        perfetto::Track(track_base_ + frame_id % kMaxInflightFrames),
-        timestamp);
+    TRACE_EVENT_BEGIN("latencyflex", "frame",
+                      perfetto::Track(track_base_ + frame_id % kMaxInflightFrames), timestamp);
     frame_begin_ids_[frame_id % kMaxInflightFrames] = frame_id;
     frame_begin_ts_[frame_id % kMaxInflightFrames] = timestamp;
     prev_frame_begin_id_ = frame_id;
@@ -201,8 +191,7 @@ public:
   // If `latency` and `frame_time` are not null, then the latency and the frame
   // time are returned respectively, or UINT64_MAX is returned if measurement is
   // unavailable.
-  void EndFrame(uint64_t frame_id, uint64_t timestamp, uint64_t *latency,
-                uint64_t *frame_time) {
+  void EndFrame(uint64_t frame_id, uint64_t timestamp, uint64_t *latency, uint64_t *frame_time) {
     size_t phase = frame_id % kNumPhases;
     int64_t latency_val = -1;
     int64_t frame_time_val = -1;
@@ -225,16 +214,14 @@ public:
       if (prev_frame_end_id_ != UINT64_MAX) {
         if (frame_id > prev_frame_end_id_) {
           auto frames_elapsed = frame_id - prev_frame_end_id_;
-          frame_time_val = ((int64_t)timestamp - (int64_t)prev_frame_end_ts_) /
-                           (int64_t)frames_elapsed;
           frame_time_val =
-              std::clamp(frame_time_val, INT64_C(1000000), INT64_C(50000000));
+              ((int64_t)timestamp - (int64_t)prev_frame_end_ts_) / (int64_t)frames_elapsed;
+          frame_time_val = std::clamp(frame_time_val, INT64_C(1000000), INT64_C(50000000));
           if (phase == kUp && frame_time_val > 0) {
             inv_throughtput_.update(frame_time_val);
           }
           TRACE_COUNTER("latencyflex", "Frame Time", frame_time_val);
-          TRACE_COUNTER("latencyflex", "Frame Time (Estimate)",
-                        inv_throughtput_.get());
+          TRACE_COUNTER("latencyflex", "Frame Time (Estimate)", inv_throughtput_.get());
         }
       }
       prev_frame_end_id_ = frame_id;
@@ -242,10 +229,8 @@ public:
     }
     if (frame_time)
       *frame_time = frame_time_val;
-    TRACE_EVENT_END(
-        "latencyflex",
-        perfetto::Track(track_base_ + frame_id % kMaxInflightFrames),
-        timestamp);
+    TRACE_EVENT_END("latencyflex", perfetto::Track(track_base_ + frame_id % kMaxInflightFrames),
+                    timestamp);
   }
 
   void Reset() {

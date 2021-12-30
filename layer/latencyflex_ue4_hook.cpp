@@ -31,15 +31,13 @@ void lfx_FEngineLoop_Tick(void *self) {
 
 void ue4_hook_init() {
   if (getenv("LFX_UE4_HOOK")) {
-    real_tick = reinterpret_cast<tick_func>(
-        std::stoul(getenv("LFX_UE4_HOOK"), nullptr, 16));
+    real_tick = reinterpret_cast<tick_func>(std::stoul(getenv("LFX_UE4_HOOK"), nullptr, 16));
   } else {
     return;
   }
   int err;
   tick_hook = funchook_create();
-  err = funchook_prepare(tick_hook, (void **)&real_tick,
-                         (void *)lfx_FEngineLoop_Tick);
+  err = funchook_prepare(tick_hook, (void **)&real_tick, (void *)lfx_FEngineLoop_Tick);
   if (err != 0)
     goto err;
   err = funchook_install(tick_hook, 0);
@@ -49,8 +47,7 @@ void ue4_hook_init() {
   return;
 
 err:
-  std::cerr << "LatencyFleX: Error during UE4 hook initialization, err=" << err
-            << std::endl;
+  std::cerr << "LatencyFleX: Error during UE4 hook initialization, err=" << err << std::endl;
 }
 
 class OnLoad {

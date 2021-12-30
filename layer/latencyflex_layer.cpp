@@ -37,8 +37,7 @@ std::atomic_bool ticker_needs_reset = false;
 std::atomic_uint64_t frame_counter_render = 0;
 lfx::LatencyFleX manager;
 
-typedef void(VKAPI_PTR *PFN_overlay_SetMetrics)(const char **, const float *,
-                                                size_t);
+typedef void(VKAPI_PTR *PFN_overlay_SetMetrics)(const char **, const float *, size_t);
 PFN_overlay_SetMetrics overlay_SetMetrics = nullptr;
 
 const int kMaxFrameDrift = 16;
@@ -55,9 +54,7 @@ struct PresentInfo {
 };
 
 // use the loader's dispatch table pointer as a key for dispatch map lookups
-template <typename DispatchableType> void *GetKey(DispatchableType inst) {
-  return *(void **)inst;
-}
+template <typename DispatchableType> void *GetKey(DispatchableType inst) { return *(void **)inst; }
 
 // layer book-keeping information, to store dispatch tables by key
 std::map<void *, VkLayerInstanceDispatchTable> instance_dispatch;
@@ -135,13 +132,11 @@ std::map<void *, std::unique_ptr<FenceWaitThread>> wait_threads;
 VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                                        const VkAllocationCallbacks *pAllocator,
                                        VkInstance *pInstance) {
-  VkLayerInstanceCreateInfo *layerCreateInfo =
-      (VkLayerInstanceCreateInfo *)pCreateInfo->pNext;
+  VkLayerInstanceCreateInfo *layerCreateInfo = (VkLayerInstanceCreateInfo *)pCreateInfo->pNext;
 
   // step through the chain of pNext until we get to the link info
   while (layerCreateInfo &&
-         (layerCreateInfo->sType !=
-              VK_STRUCTURE_TYPE_LOADER_INSTANCE_CREATE_INFO ||
+         (layerCreateInfo->sType != VK_STRUCTURE_TYPE_LOADER_INSTANCE_CREATE_INFO ||
           layerCreateInfo->function != VK_LAYER_LINK_INFO)) {
     layerCreateInfo = (VkLayerInstanceCreateInfo *)layerCreateInfo->pNext;
   }
@@ -151,13 +146,11 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
     return VK_ERROR_INITIALIZATION_FAILED;
   }
 
-  PFN_vkGetInstanceProcAddr gpa =
-      layerCreateInfo->u.pLayerInfo->pfnNextGetInstanceProcAddr;
+  PFN_vkGetInstanceProcAddr gpa = layerCreateInfo->u.pLayerInfo->pfnNextGetInstanceProcAddr;
   // move chain on for next layer
   layerCreateInfo->u.pLayerInfo = layerCreateInfo->u.pLayerInfo->pNext;
 
-  PFN_vkCreateInstance createFunc =
-      (PFN_vkCreateInstance)gpa(VK_NULL_HANDLE, "vkCreateInstance");
+  PFN_vkCreateInstance createFunc = (PFN_vkCreateInstance)gpa(VK_NULL_HANDLE, "vkCreateInstance");
 
   VkResult ret = createFunc(pCreateInfo, pAllocator, pInstance);
   if (ret != VK_SUCCESS)
@@ -167,11 +160,9 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   VkLayerInstanceDispatchTable dispatchTable;
   dispatchTable.GetInstanceProcAddr =
       (PFN_vkGetInstanceProcAddr)gpa(*pInstance, "vkGetInstanceProcAddr");
-  dispatchTable.DestroyInstance =
-      (PFN_vkDestroyInstance)gpa(*pInstance, "vkDestroyInstance");
-  dispatchTable.EnumerateDeviceExtensionProperties =
-      (PFN_vkEnumerateDeviceExtensionProperties)gpa(
-          *pInstance, "vkEnumerateDeviceExtensionProperties");
+  dispatchTable.DestroyInstance = (PFN_vkDestroyInstance)gpa(*pInstance, "vkDestroyInstance");
+  dispatchTable.EnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)gpa(
+      *pInstance, "vkEnumerateDeviceExtensionProperties");
 
   // store the table by key
   {
@@ -179,31 +170,27 @@ VkResult VKAPI_CALL lfx_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
     instance_dispatch[GetKey(*pInstance)] = dispatchTable;
 
     if (void *mod = dlopen("libMangoHud.so", RTLD_NOW | RTLD_NOLOAD)) {
-      overlay_SetMetrics =
-          (PFN_overlay_SetMetrics)dlsym(mod, "overlay_SetMetrics");
+      overlay_SetMetrics = (PFN_overlay_SetMetrics)dlsym(mod, "overlay_SetMetrics");
     }
   }
 
   return VK_SUCCESS;
 }
 
-void VKAPI_CALL lfx_DestroyInstance(VkInstance instance,
-                                    const VkAllocationCallbacks *pAllocator) {
+void VKAPI_CALL lfx_DestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
   instance_dispatch.erase(GetKey(instance));
 }
 
 VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
                                      const VkDeviceCreateInfo *pCreateInfo,
-                                     const VkAllocationCallbacks *pAllocator,
-                                     VkDevice *pDevice) {
-  VkLayerDeviceCreateInfo *layerCreateInfo =
-      (VkLayerDeviceCreateInfo *)pCreateInfo->pNext;
+                                     const VkAllocationCallbacks *pAllocator, VkDevice *pDevice) {
+  VkLayerDeviceCreateInfo *layerCreateInfo = (VkLayerDeviceCreateInfo *)pCreateInfo->pNext;
 
   // step through the chain of pNext until we get to the link info
-  while (layerCreateInfo && (layerCreateInfo->sType !=
-                                 VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO ||
-                             layerCreateInfo->function != VK_LAYER_LINK_INFO)) {
+  while (layerCreateInfo &&
+         (layerCreateInfo->sType != VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO ||
+          layerCreateInfo->function != VK_LAYER_LINK_INFO)) {
     layerCreateInfo = (VkLayerDeviceCreateInfo *)layerCreateInfo->pNext;
   }
 
@@ -212,22 +199,18 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
     return VK_ERROR_INITIALIZATION_FAILED;
   }
 
-  PFN_vkGetInstanceProcAddr gipa =
-      layerCreateInfo->u.pLayerInfo->pfnNextGetInstanceProcAddr;
-  PFN_vkGetDeviceProcAddr gdpa =
-      layerCreateInfo->u.pLayerInfo->pfnNextGetDeviceProcAddr;
+  PFN_vkGetInstanceProcAddr gipa = layerCreateInfo->u.pLayerInfo->pfnNextGetInstanceProcAddr;
+  PFN_vkGetDeviceProcAddr gdpa = layerCreateInfo->u.pLayerInfo->pfnNextGetDeviceProcAddr;
   // move chain on for next layer
   layerCreateInfo->u.pLayerInfo = layerCreateInfo->u.pLayerInfo->pNext;
 
-  PFN_vkCreateDevice createFunc =
-      (PFN_vkCreateDevice)gipa(VK_NULL_HANDLE, "vkCreateDevice");
+  PFN_vkCreateDevice createFunc = (PFN_vkCreateDevice)gipa(VK_NULL_HANDLE, "vkCreateDevice");
 
   VkResult ret = createFunc(physicalDevice, pCreateInfo, pAllocator, pDevice);
   if (ret != VK_SUCCESS)
     return ret;
 
-#define ASSIGN_FUNCTION(name)                                                  \
-  dispatchTable.name = (PFN_vk##name)gdpa(*pDevice, "vk" #name);
+#define ASSIGN_FUNCTION(name) dispatchTable.name = (PFN_vk##name)gdpa(*pDevice, "vk" #name);
   // fetch our own dispatch table for the functions we need, into the next layer
   VkLayerDispatchTable dispatchTable;
   ASSIGN_FUNCTION(GetDeviceProcAddr);
@@ -250,8 +233,7 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
   return VK_SUCCESS;
 }
 
-void VKAPI_CALL lfx_DestroyDevice(VkDevice device,
-                                  const VkAllocationCallbacks *pAllocator) {
+void VKAPI_CALL lfx_DestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator) {
   scoped_lock l(global_lock);
   wait_threads.erase(GetKey(device));
   device_dispatch.erase(GetKey(device));
@@ -261,15 +243,14 @@ void VKAPI_CALL lfx_DestroyDevice(VkDevice device,
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration function
 
-VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(
-    uint32_t *pPropertyCount, VkLayerProperties *pProperties) {
+VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(uint32_t *pPropertyCount,
+                                                         VkLayerProperties *pProperties) {
   if (pPropertyCount)
     *pPropertyCount = 1;
 
   if (pProperties) {
     strcpy(pProperties->layerName, LAYER_NAME);
-    strcpy(pProperties->description,
-           "LatencyFleX (TM) latency reduction middleware");
+    strcpy(pProperties->description, "LatencyFleX (TM) latency reduction middleware");
     pProperties->implementationVersion = 1;
     pProperties->specVersion = VK_MAKE_VERSION(1, 2, 136);
   }
@@ -277,15 +258,15 @@ VkResult VKAPI_CALL lfx_EnumerateInstanceLayerProperties(
   return VK_SUCCESS;
 }
 
-VkResult VKAPI_CALL lfx_EnumerateDeviceLayerProperties(
-    VkPhysicalDevice physicalDevice, uint32_t *pPropertyCount,
-    VkLayerProperties *pProperties) {
+VkResult VKAPI_CALL lfx_EnumerateDeviceLayerProperties(VkPhysicalDevice physicalDevice,
+                                                       uint32_t *pPropertyCount,
+                                                       VkLayerProperties *pProperties) {
   return lfx_EnumerateInstanceLayerProperties(pPropertyCount, pProperties);
 }
 
-VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(
-    const char *pLayerName, uint32_t *pPropertyCount,
-    VkExtensionProperties *pProperties) {
+VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(const char *pLayerName,
+                                                             uint32_t *pPropertyCount,
+                                                             VkExtensionProperties *pProperties) {
   if (pLayerName == nullptr || strcmp(pLayerName, LAYER_NAME))
     return VK_ERROR_LAYER_NOT_PRESENT;
 
@@ -295,18 +276,18 @@ VkResult VKAPI_CALL lfx_EnumerateInstanceExtensionProperties(
   return VK_SUCCESS;
 }
 
-VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
-    VkPhysicalDevice physicalDevice, const char *pLayerName,
-    uint32_t *pPropertyCount, VkExtensionProperties *pProperties) {
+VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(VkPhysicalDevice physicalDevice,
+                                                           const char *pLayerName,
+                                                           uint32_t *pPropertyCount,
+                                                           VkExtensionProperties *pProperties) {
   // pass through any queries that aren't to us
   if (pLayerName == nullptr || strcmp(pLayerName, LAYER_NAME)) {
     if (physicalDevice == VK_NULL_HANDLE)
       return VK_SUCCESS;
 
     scoped_lock l(global_lock);
-    return instance_dispatch[GetKey(physicalDevice)]
-        .EnumerateDeviceExtensionProperties(physicalDevice, pLayerName,
-                                            pPropertyCount, pProperties);
+    return instance_dispatch[GetKey(physicalDevice)].EnumerateDeviceExtensionProperties(
+        physicalDevice, pLayerName, pPropertyCount, pProperties);
   }
 
   // don't expose any extensions
@@ -315,8 +296,7 @@ VkResult VKAPI_CALL lfx_EnumerateDeviceExtensionProperties(
   return VK_SUCCESS;
 }
 
-VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
-                                        const VkPresentInfoKHR *pPresentInfo) {
+VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
   frame_counter_render++;
   uint64_t frame_counter_local = frame_counter.load();
   uint64_t frame_counter_render_local = frame_counter_render.load();
@@ -349,12 +329,12 @@ VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue,
 ///////////////////////////////////////////////////////////////////////////////////////////
 // GetProcAddr functions, entry points of the layer
 
-#define GETPROCADDR(func)                                                      \
-  if (!strcmp(pName, "vk" #func))                                              \
+#define GETPROCADDR(func)                                                                          \
+  if (!strcmp(pName, "vk" #func))                                                                  \
   return (PFN_vkVoidFunction)&lfx_##func
 
-extern "C" VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL
-lfx_GetDeviceProcAddr(VkDevice device, const char *pName) {
+extern "C" VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL lfx_GetDeviceProcAddr(VkDevice device,
+                                                                               const char *pName) {
   // device chain functions we intercept
   GETPROCADDR(GetDeviceProcAddr);
   GETPROCADDR(EnumerateDeviceLayerProperties);
@@ -388,8 +368,7 @@ lfx_GetInstanceProcAddr(VkInstance instance, const char *pName) {
 
   {
     scoped_lock l(global_lock);
-    return instance_dispatch[GetKey(instance)].GetInstanceProcAddr(instance,
-                                                                   pName);
+    return instance_dispatch[GetKey(instance)].GetInstanceProcAddr(instance, pName);
   }
 }
 
@@ -445,7 +424,8 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
 extern "C" VK_LAYER_EXPORT void lfx_SetTargetFrameTime(uint64_t target_frame_time) {
   scoped_lock l(global_lock);
   manager.target_frame_time = target_frame_time;
-  std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time << std::endl;
+  std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time
+            << std::endl;
 }
 
 namespace {
@@ -456,7 +436,8 @@ public:
     if (getenv("LFX_MAX_FPS")) {
       // No lock needed because this is done inside static initialization.
       manager.target_frame_time = 1000000000 / std::stoul(getenv("LFX_MAX_FPS"));
-      std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time << std::endl;
+      std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time
+                << std::endl;
     }
   }
 };
