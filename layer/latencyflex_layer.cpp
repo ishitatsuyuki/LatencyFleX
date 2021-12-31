@@ -413,13 +413,11 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
     // so the user can at least quit the application
     target = std::min(now + UINT64_C(50000000), target);
     std::this_thread::sleep_for(std::chrono::nanoseconds(target - now));
-  } else {
-    target = now;
   }
   {
     scoped_lock l(global_lock);
-    // Use the sleep target as the frame begin time. See `BeginFrame` docs.
-    manager.BeginFrame(frame_counter_local, target);
+    now = current_time_ns();
+    manager.BeginFrame(frame_counter_local, now);
   }
 }
 

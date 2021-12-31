@@ -165,12 +165,7 @@ public:
 
   // Begin the frame. Called on the main/simulation thread.
   //
-  // It's recommended that the timestamp is calculated as follows:
-  // - If a sleep is not performed (because the wait target has already been
-  //   passed), then pass the current time.
-  // - If a sleep is performed (wait target was not in the past), then pass the
-  //   wait target as-is. This allows compensating for any latency incurred by
-  //   the OS for waking up the process.
+  // `timestamp` should be captured right before the call to BeginFrame.
   void BeginFrame(uint64_t frame_id, uint64_t timestamp) {
     TRACE_EVENT_BEGIN("latencyflex", "frame",
                       perfetto::Track(track_base_ + frame_id % kMaxInflightFrames), timestamp);
