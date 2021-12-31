@@ -121,7 +121,11 @@ public:
             std::max(INT64_C(0), prediction_error + prev_comp_applied / 2) -
             std::max(INT64_C(0), prev_prediction_error_ - prev_comp_applied / 2));
         prev_prediction_error_ = prediction_error;
-        comp_to_apply = std::round(proj_correction_.get());
+        // Try to cancel out any unintended delay happened to previous frame start. This is
+        // primarily meant for cases where a frame time spike happens and we get backpressured
+        // on the main thread. prev_forced_correction_ will stay high until our prediction catches
+        // up, canceling out any excessive correction we might end up doing.
+        comp_to_apply = std::round(proj_correction_.get()) - prev_forced_correction_;
         comp_applied_[frame_id % kMaxInflightFrames] = comp_to_apply;
         TRACE_COUNTER("latencyflex", "Delay Compensation", comp_to_apply);
       }
@@ -177,6 +181,7 @@ public:
       int64_t forced_correction = timestamp - prev_frame_target_ts_;
       frame_end_projected_ts_[frame_id % kMaxInflightFrames] += forced_correction;
       comp_applied_[frame_id % kMaxInflightFrames] += forced_correction;
+      prev_forced_correction_ = forced_correction;
     }
   }
 
@@ -260,6 +265,7 @@ private:
   uint64_t prev_frame_end_id_ = UINT64_MAX;
   uint64_t prev_frame_end_ts_ = 0;
   uint64_t prev_frame_real_end_ts_ = 0;
+  int64_t prev_forced_correction_ = 0;
   internal::EwmaEstimator latency_;
   internal::EwmaEstimator inv_throughtput_;
   internal::EwmaEstimator proj_correction_;
