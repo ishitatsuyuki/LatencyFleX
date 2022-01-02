@@ -111,21 +111,30 @@ public:
         // We need to limit the compensation to delay increase, or otherwise we would cancel out the
         // regular delay decrease from our pacing. To achieve this, we treat any early prediction as
         // having prediction error of zero.
+        //
         // We also want to cancel out the counter-reaction from our previous compensation, so what
         // we essentially want here is `prediction_error_ - prev_prediction_error_ +
-        // prev_comp_applied`. However, due to the nonlinearity we can't just add prev_comp_applied:
-        // that would overcompensate for values going into the negative region. We just attribute
-        // the value symmetrically to both sides of the subtraction, in hope that it will be an
-        // unbiased estimate.
+        // prev_comp_applied`. But since we clamp prediction_error_ and prev_prediction_error_,
+        // the naive approach of adding prev_comp_applied directly would have a bias toward
+        // overcompensation. Consider the example below where we're pacing at the correct (100%)
+        // rate but things arrives late due to reason that are *not* queuing (noise):
+        // 5ms late, 5ms late, ... (a period longer than our latency) ... , 0ms
+        // We would compensate -5ms on the first frame, bringing the prediction error to 0. But when
+        // the 0ms frame arrives, the prediction error becomes -5ms due to our overcompensation.
+        // Due to its negativity, we don't recompensate for this decrease: this is the bias.
+        //
+        // The solution here is to include prev_comp_applied as a part of clamping equation, which
+        // allows it to also undercompensate when it makes sense. It seems to do a great job on
+        // preventing prediction error from getting stuck in a state that is drift away.
         proj_correction_.update(
-            std::max(INT64_C(0), prediction_error + prev_comp_applied / 2) -
-            std::max(INT64_C(0), prev_prediction_error_ - prev_comp_applied / 2));
+            std::max(INT64_C(0), prediction_error) -
+            std::max(INT64_C(0), prev_prediction_error_ - prev_comp_applied));
         prev_prediction_error_ = prediction_error;
         // Try to cancel out any unintended delay happened to previous frame start. This is
         // primarily meant for cases where a frame time spike happens and we get backpressured
         // on the main thread. prev_forced_correction_ will stay high until our prediction catches
         // up, canceling out any excessive correction we might end up doing.
-        comp_to_apply = std::round(proj_correction_.get()) - prev_forced_correction_;
+        comp_to_apply = std::round(proj_correction_.get());
         comp_applied_[frame_id % kMaxInflightFrames] = comp_to_apply;
         TRACE_COUNTER("latencyflex", "Delay Compensation", comp_to_apply);
       }
@@ -176,7 +185,7 @@ public:
       int64_t forced_correction = timestamp - prev_frame_target_ts_;
       frame_end_projected_ts_[frame_id % kMaxInflightFrames] += forced_correction;
       comp_applied_[frame_id % kMaxInflightFrames] += forced_correction;
-      prev_forced_correction_ = forced_correction;
+      prev_prediction_error_ += forced_correction;
     }
   }
 
@@ -260,7 +269,6 @@ private:
   uint64_t prev_frame_end_id_ = UINT64_MAX;
   uint64_t prev_frame_end_ts_ = 0;
   uint64_t prev_frame_real_end_ts_ = 0;
-  int64_t prev_forced_correction_ = 0;
   internal::EwmaEstimator latency_;
   internal::EwmaEstimator inv_throughtput_;
   internal::EwmaEstimator proj_correction_;
