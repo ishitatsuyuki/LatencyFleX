@@ -69,9 +69,13 @@ jobs:
 
       - run: |
           cd layer/unity
-          export OUTDIR="${OUTDIR}/unity"
-          dotnet restore
-          dotnet build --configuration Release --no-restore
+          OUTDIR_=$OUTDIR
+          export OUTDIR="${OUTDIR_}/unity/mono-2018.1"
+          dotnet build --configuration Release -p:UnityTarget=2018.1 -p:UnityRuntime=Mono LatencyFleX.csproj
+          export OUTDIR="${OUTDIR_}/unity/mono-2019.3"
+          dotnet build --configuration Release -p:UnityTarget=2019.3 -p:UnityRuntime=Mono LatencyFleX.csproj
+          export OUTDIR="${OUTDIR_}/unity/il2cpp-2019.3"
+          dotnet build --configuration Release -p:UnityTarget=2019.3 -p:UnityRuntime=IL2CPP LatencyFleX.csproj
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2

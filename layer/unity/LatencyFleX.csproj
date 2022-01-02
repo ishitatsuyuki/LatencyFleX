@@ -10,13 +10,60 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Unity" Version="6.0.0-*" IncludeAssets="compile" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-	<PackageReference Include="UnityEngine.Modules" Version="2018.1.4" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*"/>
   </ItemGroup>
-  
+
+  <Choose>
+    <When Condition="'$(UnityRuntime)' == 'IL2CPP'">
+      <ItemGroup>
+        <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-*" IncludeAssets="compile"/>
+        <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22"/>
+        <Reference Include="Il2Cppmscorlib">
+          <HintPath>..\lib\unhollowed\Il2Cppmscorlib.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>..\lib\unhollowed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>..\lib\unhollowed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+      <PropertyGroup>
+        <DefineConstants>LFX_USE_IL2CPP;$(DefineConstants)</DefineConstants>
+        <TargetFramework>netstandard2.1</TargetFramework>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <Choose>
+        <When Condition="'$(UnityTarget)' == '2019.3'">
+          <ItemGroup>
+            <PackageReference Include="UnityEngine.Modules" Version="2019.3.*" IncludeAssets="compile"/>
+          </ItemGroup>
+        </When>
+        <Otherwise>
+          <ItemGroup>
+            <PackageReference Include="UnityEngine.Modules" Version="2018.1.*" IncludeAssets="compile"/>
+          </ItemGroup>
+        </Otherwise>
+      </Choose>
+      <ItemGroup>
+        <PackageReference Include="BepInEx.Unity" Version="6.0.0-*" IncludeAssets="compile"/>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <Choose>
+    <When Condition="'$(UnityTarget)' == '2019.3'">
+      <PropertyGroup>
+        <DefineConstants>LFX_USE_UNITY_2019_3;$(DefineConstants)</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 </Project>

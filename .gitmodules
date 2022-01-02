@@ -4,3 +4,6 @@
 [submodule "layer/subprojects/perfetto"]
 	path = layer/subprojects/perfetto
 	url = https://android.googlesource.com/platform/external/perfetto
+[submodule "layer/unity/unhollowed"]
+	path = layer/unity/unhollowed
+	url = https://github.com/ishitatsuyuki/unhollowed-assemblies.git
