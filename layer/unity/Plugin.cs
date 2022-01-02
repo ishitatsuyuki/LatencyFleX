@@ -96,7 +96,11 @@ namespace LatencyFleX
                 updateDelegate = new PlayerLoopSystem.UpdateFunction(updateDelegate),
             };
 
+#if LFX_USE_UNITY_2019_3
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+#else
             var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+#endif
 
             var initSubSystem = playerLoop.subSystemList[0];
             var subSystem = new List<PlayerLoopSystem>(initSubSystem.subSystemList);
