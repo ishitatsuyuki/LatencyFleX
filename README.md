@@ -197,8 +197,6 @@ Supported platforms: Linux (see note)
 
 Supported platforms: Proton, Linux
 
-**Note:** This is work-in-progress and supports only 2018.x/2019.x on Mono (IL2CPP unsupported).
-
 1. [Install](#installation) the Vulkan layer. Also install the Wine extension the game runs on Wine/Proton.
 2. Install [BepInEx Bleeding Edge](https://docs.bepinex.dev/master/articles/user_guide/installation/index.html) to the game directory.
 3. Run the game once to generate BepInEx directory structure, config files and startup log.
