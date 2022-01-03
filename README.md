@@ -149,10 +149,13 @@ Please do it at your own risk.
 
 Tested games:
 
-| Game        | Support | Method         |
-|-------------|---------|----------------|
-| Splitgate   | ✅       | Linux UE4 Hook |
-| Ghostrunner | ✅       | Proton NVAPI   |
+| Game           | Support | Method         |
+|----------------|---------|----------------|
+| Splitgate      | ✅       | Linux UE4 Hook |
+| Ghostrunner    | ✅       | Proton NVAPI   |
+| Overwatch [^1] | ✅       | Proton NVAPI   |
+
+[^1]: Uses anti-cheat. Use at your own risk.
 
 Game supported but not in list? File a PR to update the table.
 
