@@ -172,6 +172,7 @@ Game supported but not in list? File a PR to update the table.
    ```shell
    PROTON_ENABLE_NVAPI=1 DXVK_NVAPI_DRIVER_VERSION=49729 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 LFX=1 %command%
    ```
+4. Don't forget to enable **Reflex Low-Latency** in-game.
 
 #### UE4 Hook
 
