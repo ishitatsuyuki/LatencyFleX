@@ -404,6 +404,7 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
   }
   uint64_t now = current_time_ns();
   uint64_t target;
+  uint64_t wakeup;
   {
     scoped_lock l(global_lock);
     target = manager.GetWaitTarget(frame_counter_local);
@@ -411,15 +412,15 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
   if (target > now) {
     // failsafe: if something ever goes wrong, sustain an interactive framerate
     // so the user can at least quit the application
-    target = std::min(now + UINT64_C(50000000), target);
-    std::this_thread::sleep_for(std::chrono::nanoseconds(target - now));
+    wakeup = std::min(now + UINT64_C(50000000), target);
+    std::this_thread::sleep_for(std::chrono::nanoseconds(wakeup - now));
   } else {
-    target = now;
+    wakeup = now;
   }
   {
     scoped_lock l(global_lock);
     // Use the sleep target as the frame begin time. See `BeginFrame` docs.
-    manager.BeginFrame(frame_counter_local, target);
+    manager.BeginFrame(frame_counter_local, target, wakeup);
   }
 }
 

@@ -81,9 +81,9 @@ public:
     std::fill(std::begin(frame_begin_ids_), std::end(frame_begin_ids_), UINT64_MAX);
   }
 
-  // Get the desired wake-up time. Sleep until this time, then call
-  // BeginFrame(). target_frame_time can be specified to limit the FPS, or left
-  // at 0 for unlimited framerate.
+  // Get the desired wake-up time. Sleep until this time, then call `BeginFrame()`. This function
+  // must be called *exactly once* before each call to `BeginFrame()`. Calling this the second time
+  // with the same `frame_id` will corrupt the internal time tracking.
   //
   // If a wait target cannot be determined due to lack of data, then `0` is
   // returned.
@@ -165,7 +165,6 @@ public:
           "latencyflex",
           perfetto::Track(track_base_ + frame_id % kMaxInflightFrames + kMaxInflightFrames),
           frame_end_projection_base_ + new_projection);
-      prev_frame_target_ts_ = target;
       return target;
     } else {
       return 0;
@@ -174,20 +173,23 @@ public:
 
   // Begin the frame. Called on the main/simulation thread.
   //
-  // It's recommended that the timestamp is calculated as follows:
+  // This call must be preceded with a call to `GetWaitTarget()`.
+  //
+  // `target` should be the timestamp returned by `GetWaitTarget()`.
+  // `timestamp` should be calculated as follows:
   // - If a sleep is not performed (because the wait target has already been
   //   passed), then pass the current time.
   // - If a sleep is performed (wait target was not in the past), then pass the
   //   wait target as-is. This allows compensating for any latency incurred by
   //   the OS for waking up the process.
-  void BeginFrame(uint64_t frame_id, uint64_t timestamp) {
+  void BeginFrame(uint64_t frame_id, uint64_t target, uint64_t timestamp) {
     TRACE_EVENT_BEGIN("latencyflex", "frame",
                       perfetto::Track(track_base_ + frame_id % kMaxInflightFrames), timestamp);
     frame_begin_ids_[frame_id % kMaxInflightFrames] = frame_id;
     frame_begin_ts_[frame_id % kMaxInflightFrames] = timestamp;
     prev_frame_begin_id_ = frame_id;
-    if (prev_frame_target_ts_ != UINT64_MAX) {
-      int64_t forced_correction = timestamp - prev_frame_target_ts_;
+    if (target != 0) {
+      int64_t forced_correction = timestamp - target;
       frame_end_projected_ts_[frame_id % kMaxInflightFrames] += forced_correction;
       comp_applied_[frame_id % kMaxInflightFrames] += forced_correction;
       prev_prediction_error_ += forced_correction;
@@ -270,7 +272,6 @@ private:
   double up_factor_ = 1.10;
   double down_factor_ = 0.985;
   int64_t prev_prediction_error_ = 0;
-  unsigned long prev_frame_target_ts_ = UINT64_MAX;
   uint64_t prev_frame_end_id_ = UINT64_MAX;
   uint64_t prev_frame_end_ts_ = 0;
   uint64_t prev_frame_real_end_ts_ = 0;
