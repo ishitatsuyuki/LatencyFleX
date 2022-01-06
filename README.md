@@ -30,7 +30,7 @@ See [BUILDING.md](./BUILDING.md)
 
 ## Usage
 
-For now, LatencyFleX can be used through one of the following injection method. Game engine integration is planned.
+For now, LatencyFleX can be used on Linux through one of the following injection method. Game engine integration is planned.
 
 ### Running games with LatencyFleX
 
@@ -56,7 +56,8 @@ Game supported but not in list? File a PR to update the table.
 #### Proton NVAPI (for games that already have NVIDIA Reflex integration)
 
 1. [Install](#installation) the Vulkan layer, wine extension and the modified branch of DXVK-NVAPI.
-2. Put the following in `dxvk.conf` (only for DX11 games):
+2. Put the following in `dxvk.conf` [^2]. If you haven't created one, create it next to the game executable.
+   If there are multiple executables, try copying and putting `dxvk.conf` next to every executable.
    ```ini
    dxgi.nvapiHack = False
    dxgi.customVendorId = 10de # If running on non-NVIDIA GPU
@@ -67,6 +68,9 @@ Game supported but not in list? File a PR to update the table.
    PROTON_ENABLE_NVAPI=1 DXVK_NVAPI_DRIVER_VERSION=49729 DXVK_NVAPI_ALLOW_OTHER_DRIVERS=1 LFX=1 %command%
    ```
 4. Don't forget to enable **Reflex Low-Latency** in-game.
+
+[^2] A previous version of this document claimed that this is DX11 only. This is not true and it's required for DX12 too
+as they use DXVK's DXGI implementation.
 
 #### UE4 Hook
 
