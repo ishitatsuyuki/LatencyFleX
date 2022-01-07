@@ -26,7 +26,7 @@ To learn more about LatencyFleX's internals, check out [the blog post](https://i
 
 ## Building from source
 
-See [BUILDING.md](./BUILDING.md)
+See [docs/BUILDING.md](./docs/BUILDING.md)
 
 ## Usage
 
