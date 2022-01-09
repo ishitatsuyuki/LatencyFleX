@@ -1,6 +1,6 @@
 # LatencyFleX (LFX)
 
-Vendor and game agnostic latency reduction middleware. An alternative to NVIDIA Reflex.
+Vendor agnostic latency reduction middleware. An alternative to NVIDIA Reflex.
 
 ![LatencyFleX brings competitive advantage with up to 10ms latency reduction](performance.png)
 
