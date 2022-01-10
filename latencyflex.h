@@ -220,7 +220,7 @@ public:
       timestamp = std::max(timestamp, prev_frame_end_ts_ + target_frame_time);
       auto frame_start = frame_begin_ts_[frame_id % kMaxInflightFrames];
       latency_val = (int64_t)timestamp - (int64_t)frame_start;
-      if (phase == kDown && latency_val > 0) {
+      if (phase == kDown) {
         latency_.update(latency_val);
       }
       if (latency)
@@ -233,7 +233,7 @@ public:
           frame_time_val =
               ((int64_t)timestamp - (int64_t)prev_frame_end_ts_) / (int64_t)frames_elapsed;
           frame_time_val = std::clamp(frame_time_val, INT64_C(1000000), INT64_C(50000000));
-          if (phase == kUp && frame_time_val > 0) {
+          if (phase == kUp) {
             inv_throughtput_.update(frame_time_val);
           }
           TRACE_COUNTER("latencyflex", "Frame Time", frame_time_val);
