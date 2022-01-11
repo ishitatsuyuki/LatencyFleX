@@ -412,7 +412,19 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
   if (target > now) {
     // failsafe: if something ever goes wrong, sustain an interactive framerate
     // so the user can at least quit the application
-    wakeup = std::min(now + UINT64_C(50000000), target);
+    static uint64_t failsafe_triggered = 0;
+    uint64_t failsafe = now + UINT64_C(50000000);
+    if (target > failsafe) {
+      wakeup = failsafe;
+      failsafe_triggered++;
+      if (failsafe_triggered > 5) {
+        // If failsafe is triggered multiple times in a row, initiate a recalibration.
+        ticker_needs_reset.store(true);
+      }
+    } else {
+      wakeup = target;
+      failsafe_triggered = 0;
+    }
     std::this_thread::sleep_for(std::chrono::nanoseconds(wakeup - now));
   } else {
     wakeup = now;
