@@ -43,11 +43,12 @@ Please do it at your own risk.
 
 Tested games:
 
-| Game           | Support | Method         |
-|----------------|---------|----------------|
-| Splitgate      | ✅       | Linux UE4 Hook |
-| Ghostrunner    | ✅       | Proton NVAPI   |
-| Overwatch [^1] | ✅       | Proton NVAPI   |
+| Game                     | Support | Method          |
+|--------------------------|---------|-----------------|
+| Splitgate                | ✅       | Linux UE4 Hook |
+| Ghostrunner              | ✅       | Proton NVAPI   |
+| Overwatch [^1]           | ✅       | Proton NVAPI   |
+| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
 
 [^1]: Uses anti-cheat. Use at your own risk.
 
