@@ -1,6 +1,6 @@
 option(
   'perfetto',
   type : 'boolean',
-  value : false,
-  description : 'Enable performance tracing with perfetto. Default: false'
+  value : true,
+  description : 'Enable performance tracing with perfetto. Default: true'
 )
