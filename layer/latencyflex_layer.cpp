@@ -223,6 +223,8 @@ VkResult VKAPI_CALL lfx_CreateDevice(VkPhysicalDevice physicalDevice,
   ASSIGN_FUNCTION(GetDeviceProcAddr);
   ASSIGN_FUNCTION(DestroyDevice);
   ASSIGN_FUNCTION(QueuePresentKHR);
+  ASSIGN_FUNCTION(AcquireNextImageKHR);
+  ASSIGN_FUNCTION(AcquireNextImage2KHR);
   ASSIGN_FUNCTION(CreateFence);
   ASSIGN_FUNCTION(DestroyFence);
   ASSIGN_FUNCTION(QueueSubmit);
@@ -334,6 +336,41 @@ VkResult VKAPI_CALL lfx_QueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *p
   return dispatch.QueuePresentKHR(queue, pPresentInfo);
 }
 
+VkResult VKAPI_CALL lfx_AcquireNextImageKHR(VkDevice device, VkSwapchainKHR swapchain,
+                                            uint64_t timeout, VkSemaphore semaphore, VkFence fence,
+                                            uint32_t *pImageIndex) {
+  std::unique_lock<std::mutex> l(global_lock);
+  VkLayerDispatchTable &dispatch = device_dispatch[GetKey(device)];
+  l.unlock();
+  VkResult res =
+      dispatch.AcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
+  if (res < 0) {
+    // An error has occurred likely due to an Alt-Tab or resize.
+    // The application will likely give up presenting this frame, which means that we won't get a
+    // call to QueuePresentKHR! This can cause the frame counter to desync. Schedule a recalibration
+    // immediately.
+    ticker_needs_reset.store(true);
+  }
+  return res;
+}
+
+VkResult VKAPI_CALL lfx_AcquireNextImage2KHR(VkDevice device,
+                                             const VkAcquireNextImageInfoKHR *pAcquireInfo,
+                                             uint32_t *pImageIndex) {
+  std::unique_lock<std::mutex> l(global_lock);
+  VkLayerDispatchTable &dispatch = device_dispatch[GetKey(device)];
+  l.unlock();
+  VkResult res = dispatch.AcquireNextImage2KHR(device, pAcquireInfo, pImageIndex);
+  if (res < 0) {
+    // An error has occurred likely due to an Alt-Tab or resize.
+    // The application will likely give up presenting this frame, which means that we won't get a
+    // call to QueuePresentKHR! This can cause the frame counter to desync. Schedule a recalibration
+    // immediately.
+    ticker_needs_reset.store(true);
+  }
+  return res;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // GetProcAddr functions, entry points of the layer
 
@@ -350,6 +387,8 @@ extern "C" VK_LAYER_EXPORT PFN_vkVoidFunction VKAPI_CALL lfx_GetDeviceProcAddr(V
   GETPROCADDR(CreateDevice);
   GETPROCADDR(DestroyDevice);
   GETPROCADDR(QueuePresentKHR);
+  GETPROCADDR(AcquireNextImageKHR);
+  GETPROCADDR(AcquireNextImage2KHR);
 
   {
     scoped_lock l(global_lock);
@@ -373,6 +412,8 @@ lfx_GetInstanceProcAddr(VkInstance instance, const char *pName) {
   GETPROCADDR(CreateDevice);
   GETPROCADDR(DestroyDevice);
   GETPROCADDR(QueuePresentKHR);
+  GETPROCADDR(AcquireNextImageKHR);
+  GETPROCADDR(AcquireNextImage2KHR);
 
   {
     scoped_lock l(global_lock);
