@@ -35,7 +35,13 @@ namespace {
 std::atomic_uint64_t frame_counter = 0;
 std::atomic_bool ticker_needs_reset = false;
 std::atomic_uint64_t frame_counter_render = 0;
+
 lfx::LatencyFleX manager;
+
+// Placebo mode. This turns off all sleeping but still retains latency and frame time tracking.
+// Useful for comparison benchmarks. Note that if the game does its own sleeping between the
+// syncpoint and input sampling, latency values from placebo mode might not be accurate.
+bool is_placebo_mode = false;
 
 typedef void(VKAPI_PTR *PFN_overlay_SetMetrics)(const char **, const float *, size_t);
 PFN_overlay_SetMetrics overlay_SetMetrics = nullptr;
@@ -409,7 +415,7 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
     scoped_lock l(global_lock);
     target = manager.GetWaitTarget(frame_counter_local);
   }
-  if (target > now) {
+  if (!is_placebo_mode && target > now) {
     // failsafe: if something ever goes wrong, sustain an interactive framerate
     // so the user can at least quit the application
     static uint64_t failsafe_triggered = 0;
@@ -453,6 +459,9 @@ public:
       manager.target_frame_time = 1000000000 / std::stoul(getenv("LFX_MAX_FPS"));
       std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time
                 << std::endl;
+    }
+    if (getenv("LFX_PLACEBO")) {
+      is_placebo_mode = true;
     }
   }
 };
