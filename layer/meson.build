@@ -25,6 +25,8 @@ endif
 
 incdir = include_directories('..')
 layer = library('latencyflex_layer', 'latencyflex_layer.cpp', 'latencyflex_ue4_hook.cpp', 'latencyflex_perfetto.cpp',
+        gnu_symbol_visibility : 'hidden',
+        link_args : '-Wl,--exclude-libs,ALL',
         dependencies : deps,
         include_directories : incdir,
         install: true)
