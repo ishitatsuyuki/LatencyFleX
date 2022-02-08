@@ -43,7 +43,7 @@ jobs:
           # The Github's Ubuntu images since 20211122.1 are broken
           # https://github.com/actions/virtual-environments/issues/4589
           sudo apt install -y --allow-downgrades libpcre2-8-0=10.34-7
-          sudo apt install --no-install-recommends -y ninja-build cmake vulkan-sdk winehq-staging wine-staging wine-staging-i386
+          sudo apt install --no-install-recommends -y ninja-build cmake vulkan-sdk winehq-staging wine-staging wine-staging-dev mingw-w64
           pip install meson
 
       - run: |
@@ -62,10 +62,13 @@ jobs:
       - run: |
           export LIBRARY_PATH="${OUTDIR}/layer/usr/lib/x86_64-linux-gnu"
           cd layer/wine
-          meson build -Dprefix=/usr --cross cross-wine64.txt 
-          ninja -C build
+          meson build-wine64 -Dprefix=/usr --cross cross-wine64.txt 
+          ninja -C build-wine64
+          meson build-mingw64 -Dprefix=/usr --cross cross-mingw64.txt 
+          ninja -C build-mingw64
           mkdir -p "${OUTDIR}/wine"
-          DESTDIR="${OUTDIR}/wine" meson install -C build --skip-subprojects
+          DESTDIR="${OUTDIR}/wine" meson install -C build-wine64 --skip-subprojects
+          DESTDIR="${OUTDIR}/wine" meson install -C build-mingw64 --skip-subprojects
 
       - run: |
           cd layer/unity

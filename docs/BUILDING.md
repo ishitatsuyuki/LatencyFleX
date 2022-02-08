@@ -14,15 +14,17 @@ meson install -C build --skip-subprojects
 
 ---
 
-The Wine extension (`layer/wine/`) additionally depends on a Wine installation.
+The Wine extension (`layer/wine/`) additionally depends on a Wine installation and a MinGW toolchain.
 
 Build with:
 
 ```shell
 cd layer/wine
 export LIBRARY_PATH="$PWD/../build/" # Required if the layer has not been installed globally
-meson build --cross cross-wine64.txt 
-ninja -C build
+meson build-wine64 --cross cross-wine64.txt 
+ninja -C build-wine64
+meson build-mingw64 --cross cross-mingw64.txt
+ninja -C build-mingw64
 ```
 
 See install instructions for the locations to copy the files to.

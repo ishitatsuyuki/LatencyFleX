@@ -1,0 +1,11 @@
+[binaries]
+c = ['winegcc', '-b', 'x86_64-w64-mingw32']
+cpp = ['wineg++', '-b', 'x86_64-w64-mingw32']
+ar = 'x86_64-w64-mingw32-ar'
+strip = 'x86_64-w64-mingw32-strip'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

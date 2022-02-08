@@ -131,22 +131,29 @@ and additionally update the path specified in `/usr/share/vulkan/implicit_layer.
 
 ### LatencyFleX Wine extensions (required for Proton Reflex integration)
 
-Copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/actions?query=branch%3Amaster) to your Wine installation location.
+**Note:** The Wine extensions are migrated to a new Wine API in this version. Wine 7.0 or later is recommended, older versions might be unsupported.
 
-For Wine 7.x (including Proton-GE-Custom): change `/usr/lib/wine` to wherever Wine/Proton is installed.
-For Proton and certain distros, you also need to change `lib` to `lib64`. Copy the following files.
+1. Copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/actions?query=branch%3Amaster) to your Wine installation location.
 
-```
-/usr/lib/wine/x86_64-unix/latencyflex_wine.dll.so
-/usr/lib/wine/x86_64-windows/latencyflex_wine.dll
-```
+   For Wine 7.x: change `/usr/lib/wine` to wherever Wine/Proton is installed.
+   For Proton and certain distros, you also need to change `lib` to `lib64`. Copy the following files.
+   
+   ```
+   /usr/lib/wine/x86_64-unix/latencyflex_layer.so
+   /usr/lib/wine/x86_64-windows/latencyflex_layer.dll
+   /usr/lib/wine/x86_64-windows/latencyflex_wine.dll
+   ```
+   ``
+   For Wine <= 6.x: copy the files as follows.
+   
+   ```
+   /usr/lib/wine/x86_64-unix/latencyflex_layer.dll.so -> lib/wine/latencyflex_layer.so
+   /usr/lib/wine/x86_64-windows/latencyflex_layer.dll -> lib/wine/fakedlls/latencyflex_layer.dll
+   /usr/lib/wine/x86_64-windows/latencyflex_wine.dll -> lib/wine/fakedlls/latencyflex_wine.dll
+   ```
+2. Copy `latencyflex_layer.dll` and `latencyflex_wine.dll` to `drive_c/windows/system32/` under your prefix.
 
-For Wine <= 6.x and current Proton versions: copy the files as follows:
-
-```
-/usr/lib/wine/x86_64-unix/latencyflex_wine.dll.so -> lib64/wine/latencyflex_wine.dll.so
-/usr/lib/wine/x86_64-windows/latencyflex_wine.dll -> lib64/wine/fakedlls/latencyflex_wine.dll
-```
+   Proton prefixes can be found under `~/.local/share/Steam/steamapps/compatdata/<appid>`.
 
 ### DXVK-NVAPI with LatencyFleX integration (required for Proton Reflex integration)
 
