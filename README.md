@@ -143,7 +143,7 @@ and additionally update the path specified in `/usr/share/vulkan/implicit_layer.
    /usr/lib/wine/x86_64-windows/latencyflex_layer.dll
    /usr/lib/wine/x86_64-windows/latencyflex_wine.dll
    ```
-   ``
+
    For Wine <= 6.x: copy the files as follows.
    
    ```
