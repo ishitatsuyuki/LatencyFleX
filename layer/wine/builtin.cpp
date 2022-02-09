@@ -21,7 +21,6 @@
 #include <windows.h>
 #undef new
 
-
 // Keep this in sync with __wine_unix_call_funcs.
 enum lfx_funcs {
   unix_WaitAndBeginFrame,
@@ -63,6 +62,13 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID reserved) {
     ntdll_handle = GetModuleHandleA("ntdll.dll");
     pNtQueryVirtualMemory = reinterpret_cast<PFN_NtQueryVirtualMemory>(
         GetProcAddress(ntdll_handle, "NtQueryVirtualMemory"));
+    __wine_unix_call =
+        reinterpret_cast<PFN___wine_unix_call>(GetProcAddress(ntdll_handle, "__wine_unix_call"));
+    if (!__wine_unix_call) {
+      fprintf(stderr,
+              __FILE__ ": Cannot find __wine_unix_call. This Wine version is likely too old\n");
+      return FALSE;
+    }
     NTSTATUS err = pNtQueryVirtualMemory(GetCurrentProcess(), hinst, MemoryWineUnixFuncs,
                                          &binding_handle, sizeof(binding_handle), nullptr);
     if (err) {
@@ -70,12 +76,6 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID reserved) {
       fprintf(stderr, __FILE__ ": Look for library loading errors in the log and check if "
                                "liblatencyflex_layer.so is installed on your system.\n");
       return FALSE;
-    }
-    __wine_unix_call =
-        reinterpret_cast<PFN___wine_unix_call>(GetProcAddress(ntdll_handle, "__wine_unix_call"));
-    if (!__wine_unix_call) {
-      fprintf(stderr,
-              __FILE__ ": Cannot find __wine_unix_call. This Wine version is likely too old\n");
     }
     break;
   }
