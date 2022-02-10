@@ -47,6 +47,7 @@ Tested games:
 |--------------------------|---------|-----------------|
 | Splitgate                | ✅       | Linux UE4 Hook |
 | Ghostrunner              | ✅       | Proton NVAPI   |
+| God of War               | ✅       | Proton NVAPI   |
 | Overwatch [^1]           | ✅       | Proton NVAPI   |
 | Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
 
