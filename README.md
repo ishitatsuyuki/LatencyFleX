@@ -152,9 +152,11 @@ and additionally update the path specified in `/usr/share/vulkan/implicit_layer.
    /usr/lib/wine/x86_64-windows/latencyflex_layer.dll -> lib/wine/fakedlls/latencyflex_layer.dll
    /usr/lib/wine/x86_64-windows/latencyflex_wine.dll -> lib/wine/fakedlls/latencyflex_wine.dll
    ```
-2. Copy `latencyflex_layer.dll` and `latencyflex_wine.dll` to `drive_c/windows/system32/` under your prefix.
+2. Create symbolic links to `latencyflex_layer.dll` and `latencyflex_wine.dll`, inside `drive_c/windows/system32/` under your prefix.
 
-   Proton prefixes can be found under `~/.local/share/Steam/steamapps/compatdata/<appid>`.
+   (Alternatively, copy these files. The drawback is that you need to copy these files on every LFX update.)
+
+   Proton prefixes can be found under `~/.local/share/Steam/steamapps/compatdata/<appid>/pfx`.
 
 ### DXVK-NVAPI with LatencyFleX integration (required for Proton Reflex integration)
 
