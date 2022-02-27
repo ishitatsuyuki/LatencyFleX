@@ -18,7 +18,7 @@
     <When Condition="'$(UnityRuntime)' == 'IL2CPP'">
       <ItemGroup>
         <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-*" IncludeAssets="compile"/>
-        <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.22"/>
+        <PackageReference Include="Il2CppAssemblyUnhollower.BaseLib" Version="0.4.23"/>
         <Reference Include="Il2Cppmscorlib">
           <HintPath>..\lib\unhollowed\Il2Cppmscorlib.dll</HintPath>
           <Private>False</Private>
