@@ -23,7 +23,6 @@ To learn more about LatencyFleX's internals, check out [the blog post](https://i
 
   **Tip:** If you are using AMD GPUs, try modifying the power profile to reduce power management induced stutters: https://gitlab.freedesktop.org/drm/amd/-/issues/1500#note_1228253
 - GPU utilization will be lower (around 95% when GPU bound).
-- It might take one second or two to adapt to large frame rate increases (e.g. if the game sets a background frame limit).
 
 ## Building from source
 

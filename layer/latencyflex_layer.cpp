@@ -39,6 +39,33 @@ std::atomic_uint64_t frame_counter_render = 0;
 
 lfx::LatencyFleX manager;
 
+class IdleTracker {
+public:
+  // Returns: true if the sleep was fully performed or false if it was determined unnecessary
+  //          because there are no inflight frames.
+  bool SleepAndBegin(uint64_t frame, const std::chrono::nanoseconds &dur) {
+    std::unique_lock l(m);
+    bool skipped = cv.wait_for(l, dur, [this] { return last_began_frame == last_finished_frame; });
+    last_began_frame = frame;
+    return !skipped;
+  }
+
+  void End(uint64_t frame) {
+    std::unique_lock l(m);
+    last_finished_frame = frame;
+    if (last_began_frame == last_finished_frame)
+      cv.notify_all();
+  }
+
+private:
+  std::mutex m;
+  std::condition_variable cv;
+  std::uint64_t last_began_frame = UINT64_MAX;
+  std::uint64_t last_finished_frame = UINT64_MAX;
+};
+
+IdleTracker idle_tracker;
+
 // Placebo mode. This turns off all sleeping but still retains latency and frame time tracking.
 // Useful for comparison benchmarks. Note that if the game does its own sleeping between the
 // syncpoint and input sampling, latency values from placebo mode might not be accurate.
@@ -122,6 +149,7 @@ void FenceWaitThread::Worker() {
       scoped_lock l(global_lock);
       manager.EndFrame(info.frame_id, complete, &latency, nullptr);
     }
+    idle_tracker.End(info.frame_id);
     float latency_f = latency / 1000000.;
     const char *name = "Latency";
     if (overlay_SetMetrics && latency != UINT64_MAX) {
@@ -473,8 +501,10 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
       wakeup = target;
       failsafe_triggered = 0;
     }
-    std::this_thread::sleep_for(std::chrono::nanoseconds(wakeup - now));
+    if (!idle_tracker.SleepAndBegin(frame_counter_local, std::chrono::nanoseconds(wakeup - now)))
+      wakeup = current_time_ns();
   } else {
+    idle_tracker.SleepAndBegin(frame_counter_local, std::chrono::nanoseconds::zero());
     wakeup = now;
   }
   {
