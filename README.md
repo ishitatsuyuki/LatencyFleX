@@ -19,10 +19,9 @@ To learn more about LatencyFleX's internals, check out [the blog post](https://i
 
 ## Known issues
 
-- Minor stutters might happen during gaming session. The algorithm is still being tuned, but open an issue if the stutter
-  is severe.
-- GPU utilization will be lower when running with LatencyFleX. Overall LatencyFleX should be able to achieve ~95%
-  utilization (assuming GPU bound). Open an issue if utilization is significantly low.
+- Minor stutters might happen.
+- GPU utilization will be lower (around 95% when GPU bound).
+- It might take one second or two to adapt to large frame rate increases (e.g. if the game sets a background frame limit).
 
 ## Building from source
 
@@ -58,7 +57,7 @@ Game supported but not in list? File a PR to update the table.
 
 #### Proton NVAPI (for games that already have NVIDIA Reflex integration)
 
-1. [Install](#installation) the Vulkan layer, wine extension and the modified branch of DXVK-NVAPI.
+1. [Install](#installation) the Vulkan layer, wine extension and DXVK-NVAPI with LFX support.
 2. Put the following in `dxvk.conf` [^2]. If you haven't created one, create it next to the game executable.
    If there are multiple executables, try copying and putting `dxvk.conf` next to every executable.
    ```ini
