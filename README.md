@@ -71,6 +71,8 @@ Game supported but not in list? File a PR to update the table.
    ```
 4. Don't forget to enable **Reflex Low-Latency** in-game.
 
+Not working? See [troubleshooting guide](./docs/TROUBLESHOOTING.md)
+
 [^2]: A previous version of this document claimed that this is DX11 only. This is not true and it's required for DX12 too
 as they use DXVK's DXGI implementation.
 
