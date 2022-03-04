@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "latencyflex_layer.h"
+#include "version.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -495,6 +496,7 @@ class OnLoad {
 public:
   OnLoad() {
     std::cerr << "LatencyFleX: module loaded" << std::endl;
+    std::cerr << "LatencyFleX: Version " LATENCYFLEX_VERSION << std::endl;
     if (getenv("LFX_MAX_FPS")) {
       // No lock needed because this is done inside static initialization.
       manager.target_frame_time = 1000000000 / std::stoul(getenv("LFX_MAX_FPS"));
@@ -503,6 +505,7 @@ public:
     }
     if (getenv("LFX_PLACEBO")) {
       is_placebo_mode = true;
+      std::cerr << "LatencyFleX: Running in placebo mode" << std::endl;
     }
   }
 };

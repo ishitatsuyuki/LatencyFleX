@@ -24,7 +24,11 @@ if with_perfetto
 endif
 
 incdir = include_directories('..')
-layer = library('latencyflex_layer', 'latencyflex_layer.cpp', 'latencyflex_ue4_hook.cpp', 'latencyflex_perfetto.cpp',
+project_version = vcs_tag(
+  command: ['git', 'describe', '--always', '--tags', '--dirty=+'],
+  input:  'version.h.in',
+  output: 'version.h')
+layer = library('latencyflex_layer', 'latencyflex_layer.cpp', 'latencyflex_ue4_hook.cpp', 'latencyflex_perfetto.cpp', project_version,
         gnu_symbol_visibility : 'hidden',
         link_args : '-Wl,--exclude-libs,ALL',
         dependencies : deps,
