@@ -269,8 +269,8 @@ private:
   uint64_t frame_end_projection_base_ = UINT64_MAX;
   int64_t comp_applied_[kMaxInflightFrames] = {};
   uint64_t prev_frame_begin_id_ = UINT64_MAX;
-  double up_factor_ = 1.10;
-  double down_factor_ = 0.985;
+  double up_factor_ = 1.05;
+  double down_factor_ = 0.995;
   int64_t prev_prediction_error_ = 0;
   uint64_t prev_frame_end_id_ = UINT64_MAX;
   uint64_t prev_frame_end_ts_ = 0;
