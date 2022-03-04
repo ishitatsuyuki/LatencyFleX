@@ -47,8 +47,9 @@ jobs:
           pip install meson
 
       - run: |
-          VERSION=$(git rev-parse --short HEAD)
+          VERSION=$(git describe --always --tags)
           OUTDIR="${PWD}/dist/latencyflex-${VERSION}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "OUTDIR=${OUTDIR}" >> $GITHUB_ENV
           mkdir -p $OUTDIR
 
@@ -80,10 +81,19 @@ jobs:
           export OUTDIR="${OUTDIR_}/unity/il2cpp-2019.3"
           dotnet build --configuration Release -p:UnityTarget=2019.3 -p:UnityRuntime=IL2CPP LatencyFleX.csproj
 
+      - run: |
+          tar Jcvf "latencyflex-${VERSION}.tar.xz" -C dist latencyflex-${VERSION}
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         continue-on-error: true
         with:
-          name: LatencyFleX-${{steps.git-vars.outputs.artifact-metadata}}
+          name: latencyflex-${{steps.git-vars.outputs.artifact-metadata}}
           path: ${{env.OUTDIR}}
           retention-days: 30
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: latencyflex-${{ env.VERSION }}.tar.xz
