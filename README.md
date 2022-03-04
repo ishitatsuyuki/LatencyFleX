@@ -107,7 +107,7 @@ Supported platforms: Proton, Linux
 2. Install [BepInEx Bleeding Edge](https://docs.bepinex.dev/master/articles/user_guide/installation/index.html) to the game directory.
 3. Run the game once to generate BepInEx directory structure, config files and startup log.
    Obtain the Unity version from the first line of `BepInEx/LogOutput.log`.
-4. Drop `unity/<RUNTIME>-<VERSION>/LatencyFleX.dll` (from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/actions?query=branch%3Amaster))
+4. Drop `unity/<RUNTIME>-<VERSION>/LatencyFleX.dll` (from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/releases))
    into `BepInEx/plugins`. `<RUNTIME>` is `mono` or `il2cpp`. `<VERSION>` is:
    - `2018.1` for any version higher or equal to 2018.1 (This is currently unsupported for IL2CPP)
    - `2019.3` for any version higher or equal to 2019.3
@@ -122,7 +122,7 @@ Supported platforms: Proton, Linux
 
 ### LatencyFleX Vulkan layer (essential)
 
-For Debian-like distros, copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/actions?query=branch%3Amaster) to your root filesystem.
+For Debian-like distros, copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/releases) to your root filesystem.
 
 ```
 /usr/lib/x86_64-linux-gnu/liblatencyflex_layer.so
@@ -136,7 +136,7 @@ and additionally update the path specified in `/usr/share/vulkan/implicit_layer.
 
 **Note:** The Wine extensions are migrated to a new Wine API in this version. Wine 7.0 or later is recommended, older versions might be unsupported.
 
-1. Copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/actions?query=branch%3Amaster) to your Wine installation location.
+1. Copy the following files from [release artifacts](https://github.com/ishitatsuyuki/LatencyFleX/releases) to your Wine installation location.
 
    For Wine 7.x: change `/usr/lib/wine` to wherever Wine/Proton is installed.
    For Proton and certain distros, you also need to change `lib` to `lib64`. Copy the following files.
