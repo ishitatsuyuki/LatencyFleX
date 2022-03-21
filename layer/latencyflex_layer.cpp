@@ -66,10 +66,15 @@ private:
 
 IdleTracker idle_tracker;
 
+/* OPTIONS FROM ENVIRONMENT */
+
 // Placebo mode. This turns off all sleeping but still retains latency and frame time tracking.
 // Useful for comparison benchmarks. Note that if the game does its own sleeping between the
 // syncpoint and input sampling, latency values from placebo mode might not be accurate.
 bool is_placebo_mode = false;
+
+// Max FPS override. The frame time target is stored inside the manager.
+bool max_fps_from_env = false;
 
 typedef void(VKAPI_PTR *PFN_overlay_SetMetrics)(const char **, const float *, size_t);
 PFN_overlay_SetMetrics overlay_SetMetrics = nullptr;
@@ -516,6 +521,10 @@ extern "C" VK_LAYER_EXPORT void lfx_WaitAndBeginFrame() {
 
 extern "C" VK_LAYER_EXPORT void lfx_SetTargetFrameTime(uint64_t target_frame_time) {
   scoped_lock l(global_lock);
+  if (max_fps_from_env) {
+    std::cerr << "LatencyFleX: Ignoring target_frame_time because LFX_MAX_FPS is set." << std::endl;
+    return;
+  }
   manager.target_frame_time = target_frame_time;
   std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time
             << std::endl;
@@ -531,7 +540,8 @@ public:
       // No lock needed because this is done inside static initialization.
       manager.target_frame_time = 1000000000 / std::stoul(getenv("LFX_MAX_FPS"));
       std::cerr << "LatencyFleX: setting target frame time to " << manager.target_frame_time
-                << std::endl;
+                << " (from LFX_MAX_FPS)" << std::endl;
+      max_fps_from_env = true;
     }
     if (getenv("LFX_PLACEBO")) {
       is_placebo_mode = true;
