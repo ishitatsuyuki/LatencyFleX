@@ -49,11 +49,12 @@ Tested games:
 | Apex Legends [^1]        | ✅       | Proton NVAPI   |
 | Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
 | Overwatch [^1]           | ✅       | Proton NVAPI   |
-| Splitgate                | ✅       | Linux UE4 Hook |
+| Splitgate [^3]           | ❌       | N/A            |
 | Ghostrunner              | ✅       | Proton NVAPI   |
 | God of War               | ✅       | Proton NVAPI   |
 
 [^1]: Uses anti-cheat. Use at your own risk.
+[^3]: Game was previously supported with manual UE4 Linux hook. This is no longer possible in an easy way as the game does not ship with symbols now.
 
 Game supported but not in list? File a PR to update the table.
 
