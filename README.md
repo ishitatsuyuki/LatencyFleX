@@ -165,7 +165,7 @@ and additionally update the path specified in `/usr/share/vulkan/implicit_layer.
 
 ### DXVK-NVAPI with LatencyFleX integration (required for Proton Reflex integration)
 
-Obtain binaries from [GitHub Actions](https://github.com/jp7677/dxvk-nvapi/actions?query=branch%3Amaster).
+Obtain binaries from [GitHub Releases](https://github.com/jp7677/dxvk-nvapi/releases). Minimum version with LatencyFlex integration is 0.5.3.
 
 For Proton, copy `nvapi64.dll` into `dist/lib64/wine/nvapi`.
 
