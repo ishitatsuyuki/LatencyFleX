@@ -178,5 +178,6 @@ and install it to your system.
 Put the following line in `MangoHud.conf` to have real-time latency metrics:
 
 ```
+legacy_layout=false
 graphs=custom_Latency
 ```
