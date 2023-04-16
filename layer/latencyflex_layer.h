@@ -15,11 +15,17 @@
 #ifndef LATENCYFLEX_LATENCYFLEX_LAYER_H
 #define LATENCYFLEX_LATENCYFLEX_LAYER_H
 
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define VK_LAYER_EXPORT __attribute__((visibility("default")))
+#elif defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590)
+#define VK_LAYER_EXPORT __attribute__((visibility("default")))
+#else
+#define VK_LAYER_EXPORT
+#endif
+
 #include <atomic>
 #include <chrono>
 #include <cstdint>
-
-#include <vulkan/vk_layer.h>
 
 // These are private APIs. There is no backwards compatibility guarantee.
 

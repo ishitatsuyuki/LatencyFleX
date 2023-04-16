@@ -14,7 +14,13 @@
 
 #define __WINESRC__
 #include <stdio.h>
-#include <vulkan/vk_layer.h>
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define VK_LAYER_EXPORT __attribute__((visibility("default")))
+#elif defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590)
+#define VK_LAYER_EXPORT __attribute__((visibility("default")))
+#else
+#define VK_LAYER_EXPORT
+#endif
 
 // Silence keyword conflict in RegisterUserApiHook which uses the name `new` in arguments
 #define new
