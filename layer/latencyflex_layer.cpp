@@ -25,7 +25,7 @@
 
 #include <dlfcn.h>
 #include <vulkan/vk_layer.h>
-#include <vulkan/vk_layer_dispatch_table.h>
+#include <vulkan/generated/vk_layer_dispatch_table.h>
 #include <vulkan/vulkan.h>
 
 #include "latencyflex.h"
