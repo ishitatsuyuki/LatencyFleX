@@ -52,6 +52,7 @@ Tested games:
 | Splitgate [^3]           | ❌       | N/A            |
 | Ghostrunner              | ✅       | Proton NVAPI   |
 | God of War               | ✅       | Proton NVAPI   |
+| Spider-Man Remastered    | ✅       | Proton NVAPI   |
 
 [^1]: Uses anti-cheat. Use at your own risk.
 [^3]: Game was previously supported with manual UE4 Linux hook. This is no longer possible in an easy way as the game does not ship with symbols now.
