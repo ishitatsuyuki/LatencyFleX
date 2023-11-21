@@ -47,14 +47,16 @@ Tested games:
 | Game                     | Support | Method          |
 |--------------------------|---------|-----------------|
 | Apex Legends [^1]        | ✅       | Proton NVAPI   |
-| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
-| Overwatch [^1]           | ✅       | Proton NVAPI   |
-| Splitgate [^3]           | ❌       | N/A            |
+| Deep Rock Galactic [^2]  | ✅       | Proton NVAPI   |
 | Ghostrunner              | ✅       | Proton NVAPI   |
 | God of War               | ✅       | Proton NVAPI   |
+| Overwatch [^1]           | ✅       | Proton NVAPI   |
 | Spider-Man Remastered    | ✅       | Proton NVAPI   |
+| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
+| Splitgate [^3]           | ❌       | N/A            |
 
 [^1]: Uses anti-cheat. Use at your own risk.
+[^2]: May cause issues when used with mangohud.
 [^3]: Game was previously supported with manual UE4 Linux hook. This is no longer possible in an easy way as the game does not ship with symbols now.
 
 Game supported but not in list? File a PR to update the table.
@@ -62,7 +64,7 @@ Game supported but not in list? File a PR to update the table.
 #### Proton NVAPI (for games that already have NVIDIA Reflex integration)
 
 1. [Install](#installation) the Vulkan layer, wine extension and DXVK-NVAPI with LFX support.
-2. Put the following in `dxvk.conf` [^2]. If you haven't created one, create it next to the game executable.
+2. Put the following in `dxvk.conf` [^4]. If you haven't created one, create it next to the game executable.
    If there are multiple executables, try copying and putting `dxvk.conf` next to every executable.
    ```ini
    dxgi.nvapiHack = False
@@ -77,7 +79,7 @@ Game supported but not in list? File a PR to update the table.
 
 Not working? See [troubleshooting guide](./docs/TROUBLESHOOTING.md)
 
-[^2]: A previous version of this document claimed that this is DX11 only. This is not true and it's required for DX12 too
+[^4]: A previous version of this document claimed that this is DX11 only. This is not true and it's required for DX12 too
 as they use DXVK's DXGI implementation.
 
 #### UE4 Hook
