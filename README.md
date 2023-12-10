@@ -52,7 +52,7 @@ Tested games:
 | God of War               | ✅       | Proton NVAPI   |
 | Overwatch [^1]           | ✅       | Proton NVAPI   |
 | Spider-Man Remastered    | ✅       | Proton NVAPI   |
-| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
+| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux](https://r2northstar.gitbook.io/r2northstar-wiki/installing-northstar/steamdeck-and-linux/installing-on-steamdeck-and-linux#latencyflex)))|
 | Splitgate [^3]           | ❌       | N/A            |
 
 [^1]: Uses anti-cheat. Use at your own risk.
