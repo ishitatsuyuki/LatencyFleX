@@ -47,7 +47,7 @@ Tested games:
 | Game                     | Support | Method          |
 |--------------------------|---------|-----------------|
 | Apex Legends [^1]        | ✅       | Proton NVAPI   |
-| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/installing-northstar/steamdeck-and-linux/installing-on-steamdeck-and-linux))|
+| Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/installing-northstar/steamdeck-and-linux/installing-on-steamdeck-and-linux#latencyflex))|
 | Overwatch [^1]           | ✅       | Proton NVAPI   |
 | Splitgate [^3]           | ❌       | N/A            |
 | Ghostrunner              | ✅       | Proton NVAPI   |
