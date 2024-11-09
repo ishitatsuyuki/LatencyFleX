@@ -46,15 +46,16 @@ Tested games:
 
 | Game                     | Support | Method          |
 |--------------------------|---------|-----------------|
-| Apex Legends [^1]        | ✅       | Proton NVAPI   |
+| Apex Legends [^1]        | ❌       | Proton NVAPI   |
 | Titanfall 2 w/ Northstar | ✅       | Proton ([Native](https://r2northstar.gitbook.io/r2northstar-wiki/using-northstar/playing-on-linux))|
-| Overwatch [^1]           | ✅       | Proton NVAPI   |
+| Overwatch [^2]           | ✅       | Proton NVAPI   |
 | Splitgate [^3]           | ❌       | N/A            |
 | Ghostrunner              | ✅       | Proton NVAPI   |
 | God of War               | ✅       | Proton NVAPI   |
 | Spider-Man Remastered    | ✅       | Proton NVAPI   |
 
-[^1]: Uses anti-cheat. Use at your own risk.
+[^1]: [Game Does not work on Linux anymore](https://www.theverge.com/2024/10/31/24284644/apex-legends-loses-linux-steam-deck-support-anti-cheat).
+[^2]: Uses anti-cheat. Use at your own risk.
 [^3]: Game was previously supported with manual UE4 Linux hook. This is no longer possible in an easy way as the game does not ship with symbols now.
 
 Game supported but not in list? File a PR to update the table.
